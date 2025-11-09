@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>YOGATUNE • Forgot Password</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <h2>🔐 Forgot Password</h2>
+  <p>Enter your registered email. We’ll generate a reset code (shown here for demo).</p>
+
+  {% if info %}<p style="color:#2e7d32"><b>{{ info }}</b></p>{% endif %}
+  {% if code %}
+    <div class="form-box">
+      <p><b>Your reset code:</b> <span style="font-family:monospace">{{ code }}</span></p>
+      <p>Now go to <a href="/reset">Reset Password</a> and enter this code.</p>
+    </div>
+  {% endif %}
+
+  <form method="POST" class="form-box" style="text-align:center">
+    <label>Email</label>
+    <input type="email" name="email" placeholder="your@email.com" required>
+    <button type="submit">Generate Reset Code</button>
+  </form>
+
+  <p style="margin-top:10px"><a href="/login_register">← Back to Login</a></p>
+</body>
+</html>

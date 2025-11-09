@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Health Care • BMI & Fitness Lab</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    .wrap{max-width:1000px;margin:24px auto}
+    .nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+    .nav a{color:#444;text-decoration:none;font-weight:600}
+    .panel{background:#fff;border-radius:18px;padding:22px;box-shadow:0 8px 20px rgba(0,0,0,.08)}
+    .row{display:flex;gap:12px;flex-wrap:wrap}
+    .row > div{flex:1;min-width:220px;text-align:left}
+    .badge{display:inline-block;background:#e3f2fd;border:1px solid #bbdefb;padding:6px 10px;border-radius:999px;margin:4px 6px 0 0}
+    .muted{color:#666}
+    .btn{background:#1e88e5;color:#fff;border:none;padding:10px 16px;border-radius:10px;cursor:pointer}
+    .btn:hover{background:#1565c0}
+    input[type=number], select{width:100%}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;margin-top:16px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="nav">
+      <strong>⚖️ BMI & Fitness Lab</strong>
+      <div>
+        <a href="/home">Home</a> ·
+        <a href="/dashboard">Dashboard</a> ·
+        <a href="/logout" style="color:#d32f2f">Logout</a>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Calculate BMI, WHtR & Daily Calories</h3>
+      <p class="muted">Enter details for a quick snapshot of your body metrics and yoga suggestions.</p>
+
+      {% if error %}<p style="color:#d32f2f"><b>{{ error }}</b></p>{% endif %}
+
+      <form method="POST">
+        <div class="row">
+          <div>
+            <label>Height (cm)</label>
+            <input type="number" name="height_cm" min="80" max="250" step="0.1" placeholder="e.g., 170" required
+                   value="{{ defaults.height_cm }}">
+          </div>
+          <div>
+            <label>Weight (kg)</label>
+            <input type="number" name="weight_kg" min="20" max="300" step="0.1" placeholder="e.g., 65" required
+                   value="{{ defaults.weight_kg }}">
+          </div>
+          <div>
+            <label>Waist (cm) <span class="muted">(optional)</span></label>
+            <input type="number" name="waist_cm" min="30" max="200" step="0.1" placeholder="e.g., 80"
+                   value="{{ defaults.waist_cm }}">
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Age (years)</label>
+            <input type="number" name="age" min="12" max="100" step="1" placeholder="e.g., 22" required
+                   value="{{ defaults.age }}">
+          </div>
+          <div>
+            <label>Sex</label>
+            <select name="sex">
+              <option value="male"   {{ 'selected' if defaults.sex=='male' else '' }}>Male</option>
+              <option value="female" {{ 'selected' if defaults.sex=='female' else '' }}>Female</option>
+            </select>
+          </div>
+          <div>
+            <label>Activity Level</label>
+            <select name="activity">
+              <option value="sedentary" {{ 'selected' if defaults.activity=='sedentary' else '' }}>Sedentary</option>
+              <option value="light"     {{ 'selected' if defaults.activity=='light' else '' }}>Light (1–3 days/wk)</option>
+              <option value="moderate"  {{ 'selected' if defaults.activity=='moderate' else '' }}>Moderate (3–5 days/wk)</option>
+              <option value="active"    {{ 'selected' if defaults.activity=='active' else '' }}>Active (6–7 days/wk)</option>
+              <option value="veryactive"{{ 'selected' if defaults.activity=='veryactive' else '' }}>Very Active (2x/day)</option>
+            </select>
+          </div>
+        </div>
+
+        <button class="btn" type="submit" style="margin-top:10px">Compute Metrics</button>
+        <a class="btn" href="/consult" style="background:#2e7d32">🩺 Consult Doctor</a>
+      </form>
+    </div>
+
+    {% if result %}
+      <div class="grid">
+        <div class="panel">
+          <h3>Your BMI</h3>
+          <p><b>BMI:</b> {{ result.bmi }}</p>
+          <p><b>Category:</b> <span class="badge">{{ result.bmi_cat }}</span></p>
+          <p class="muted" style="font-size:12px">WHO: &lt;18.5 Underweight · 18.5–24.9 Normal · 25–29.9 Overweight · ≥30 Obesity</p>
+        </div>
+
+        <div class="panel">
+          <h3>Waist-to-Height Ratio</h3>
+          {% if result.whtr is not none %}
+            <p><b>WHtR:</b> {{ result.whtr }}</p>
+            <p><b>Risk Level:</b> <span class="badge">{{ result.whtr_cat }}</span></p>
+            <p class="muted" style="font-size:12px">Rule of thumb: keep waist &lt; 50% of height.</p>
+          {% else %}
+            <p class="muted">Enter waist to see central fat risk (optional).</p>
+          {% endif %}
+        </div>
+
+        <div class="panel">
+          <h3>Calories</h3>
+          <p><b>BMR:</b> ~{{ result.bmr }} kcal/day</p>
+          <p><b>Daily Calories (TDEE):</b> ~{{ result.tdee }} kcal/day <span class="muted">({{ result.activity }})</span></p>
+          <p class="muted" style="font-size:12px">BMR: energy at rest. TDEE: typical daily need based on activity.</p>
+        </div>
+
+        <div class="panel">
+          <h3>🧘 Suggested Yoga</h3>
+          {% for p in result.poses %}<span class="badge">{{ p }}</span>{% endfor %}
+          <p style="margin-top:8px"><b>Tip:</b> {{ result.tip }}</p>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+
+  <a class="fab-consult" href="/consult"><span class="dot"></span> 🩺 Consult Now</a>
+  <a href="#" class="fab-top" id="fabTop" title="Back to Top">↑ Top</a>
+  <script>
+    const fabTop=document.getElementById("fabTop");
+    window.addEventListener("scroll",()=>{ if(window.scrollY>200) fabTop.classList.add("show"); else fabTop.classList.remove("show"); });
+    fabTop.addEventListener("click",(e)=>{e.preventDefault();window.scrollTo({top:0,behavior:"smooth"});});
+  </script>
+</body>
+</html>

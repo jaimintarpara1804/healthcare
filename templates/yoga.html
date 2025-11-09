@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>YOGATUNE • Yoga Suggestions</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    .wrap{max-width:900px;margin:20px auto}
+    .nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+    .nav a{color:#444;text-decoration:none;font-weight:600}
+    .panel{background:#fff;border-radius:18px;padding:22px;box-shadow:0 8px 20px rgba(0,0,0,.08)}
+    .field{display:flex;gap:10px;flex-wrap:wrap}
+    input[type=text]{flex:1;min-width:260px}
+    ul{list-style:disc;margin:12px 0 0 20px;text-align:left}
+    .btn{background:#f9a825;color:#fff;border:none;padding:10px 16px;border-radius:10px;cursor:pointer}
+    .btn:hover{background:#f57f17}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="nav">
+      <strong>🧘 Yoga Suggestions</strong>
+      <div><a href="/home">Home</a> · <a href="/logout">Logout</a></div>
+    </div>
+
+    <div class="panel">
+      <form method="POST" class="field">
+        <input type="text" name="disease" placeholder="Enter disease e.g., stress, back pain, asthma" value="{{ disease or '' }}" required>
+        <button class="btn" type="submit">Get Poses</button>
+      </form>
+
+      {% if poses and disease %}
+        <hr>
+        <h3 style="text-align:left">Recommended for “{{ disease }}”</h3>
+        <ul>
+          {% for p in poses %}
+            <li>{{ p }}</li>
+          {% endfor %}
+        </ul>
+      {% elif disease %}
+        <hr><p>No specific yoga found. Try consulting an instructor.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Back to Top -->
+  <a href="#" class="fab-top" id="fabTop" title="Back to Top">↑ Top</a>
+  <script>
+    const fabTop = document.getElementById("fabTop");
+    window.addEventListener("scroll", () => { if (window.scrollY > 200) fabTop.classList.add("show"); else fabTop.classList.remove("show"); });
+    fabTop.addEventListener("click",(e)=>{e.preventDefault();window.scrollTo({top:0,behavior:"smooth"});});
+  </script>
+</body>
+</html>

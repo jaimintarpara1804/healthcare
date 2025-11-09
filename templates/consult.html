@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>YOGATUNE • Book Consultation</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    .wrap{max-width:860px;margin:24px auto}
+    .nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+    .nav a{color:#444;text-decoration:none;font-weight:600}
+    .box{background:#fff;border-radius:18px;padding:22px;box-shadow:0 8px 20px rgba(0,0,0,.08)}
+    label{display:block;margin:8px 0 6px;color:#444}
+    input,select,textarea{width:100%}
+    .btn{background:#43a047;color:#fff;border:none;padding:10px 16px;border-radius:10px;cursor:pointer}
+    .btn:hover{background:#2e7d32}
+    .summary{background:#f7fff6;border:1px solid #cfe9d2;border-radius:12px;padding:14px;margin-top:12px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="nav">
+      <strong>👨‍⚕️ Book Doctor Consultation</strong>
+      <div><a href="/home">Home</a> · <a href="/logout">Logout</a></div>
+    </div>
+
+    <div class="box">
+      {% if confirmation %}
+        <h3>✅ Request Submitted</h3>
+        <div class="summary">
+          <p><b>Name:</b> {{ confirmation.name }}</p>
+          <p><b>Disease:</b> {{ confirmation.disease }}</p>
+          <p><b>Doctor Type:</b> {{ confirmation.doctor_type }}</p>
+          <p><b>Description:</b> {{ confirmation.description }}</p>
+        </div>
+        <p style="margin-top:14px"><a href="/home">← Back to Home</a></p>
+      {% else %}
+        <form method="POST">
+          <label>Your Name</label>
+          <input type="text" name="name" placeholder="Enter your name" required>
+
+          <label>Disease / Problem</label>
+          <input type="text" name="disease" placeholder="e.g., back pain, diabetes" required>
+
+          <label>Doctor Type</label>
+          <select name="doctor_type" required>
+            <option value="Allopathic">Allopathic</option>
+            <option value="Ayurvedic">Ayurvedic</option>
+          </select>
+
+          <label>Description / Symptoms</label>
+          <textarea name="description" rows="4" placeholder="Write your symptoms (optional)"></textarea>
+
+          <button class="btn" type="submit" style="margin-top:12px">Submit Request</button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+</body>
+</html>

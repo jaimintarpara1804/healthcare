@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html><head>
+<meta charset="utf-8"><title>Allopathic Remedies</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<style>.wrap{max-width:800px;margin:24px auto}.panel{background:#fff;border-radius:18px;padding:22px;box-shadow:0 8px 20px rgba(0,0,0,.08)}.btn{background:#f9a825;color:#fff;border:none;padding:10px 16px;border-radius:10px;cursor:pointer}.btn:hover{background:#f57f17}</style>
+</head><body>
+<div class="wrap">
+  <h2>💊 Allopathic Remedies</h2>
+  <div class="panel">
+    <form method="POST" style="display:flex;gap:10px;flex-wrap:wrap">
+      <input type="text" name="disease" placeholder="Enter disease e.g., fever, cold, diabetes" value="{{ disease or '' }}" required>
+      <button class="btn" type="submit">Get Suggestion</button>
+    </form>
+    {% if suggestion is not none %}
+      <hr><p><b>Suggestion:</b> {{ suggestion }}</p>
+    {% endif %}
+    <p style="margin-top:10px"><a href="/home">← Back to Home</a></p>
+  </div>
+</div>
+
+<a href="#" class="fab-top" id="fabTop" title="Back to Top">↑ Top</a>
+<script>
+  const fabTop=document.getElementById("fabTop");
+  window.addEventListener("scroll",()=>{if(window.scrollY>200)fabTop.classList.add("show");else fabTop.classList.remove("show");});
+  fabTop.addEventListener("click",(e)=>{e.preventDefault();window.scrollTo({top:0,behavior:"smooth"});});
+</script>
+</body></html>

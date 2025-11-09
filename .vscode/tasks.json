@@ -1,0 +1,20 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+        "label": "Run Yogatune App",
+        "type": "shell",
+        "command": "powershell -ExecutionPolicy ByPass -Command \"& { .venv\\Scripts\\Activate.ps1; python app.py }\"",
+
+        "presentation": {
+            "reveal": "always",
+            "panel": "shared"
+        },
+        "problemMatcher": [],
+        "group": {
+            "kind": "build",
+            "isDefault": true
+        }
+    }
+]
+}

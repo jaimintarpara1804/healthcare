@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>YOGATUNE • Home</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #fff3cd, #ffeeba);
+      padding: 30px;
+      color: #333;
+      text-align: center;
+    }
+    .nav {
+      max-width: 1100px;
+      margin: 0 auto 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .nav a {
+      color: #444;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .consult-btn {
+      background: linear-gradient(135deg, #43a047, #2e7d32);
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      box-shadow: 0 6px 14px rgba(67,160,71,0.3);
+      transition: 0.3s ease;
+    }
+    .consult-btn:hover {
+      background: linear-gradient(135deg, #2e7d32, #1b5e20);
+      transform: scale(1.05);
+    }
+    .banner {
+      max-width: 1000px;
+      margin: 0 auto 28px;
+      padding: 24px;
+      border-radius: 22px;
+      background: linear-gradient(135deg, #fff7da, #ffe4a1);
+      box-shadow: 0 10px 25px rgba(0,0,0,.08);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 22px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    .card {
+      background: #fff;
+      border-radius: 18px;
+      padding: 22px;
+      box-shadow: 0 6px 16px rgba(0,0,0,.08);
+      transition: .25s;
+    }
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 10px 24px rgba(0,0,0,.12);
+    }
+    .card h3 { margin: 6px 0 8px; color: #f9a825; }
+    .btn {
+      display: inline-block; margin-top: 10px; background: #f9a825; color: white;
+      padding: 10px 16px; border-radius: 12px; text-decoration: none; font-weight: 600; transition: .25s;
+    }
+    .btn:hover { background:#f57f17; transform: scale(1.05); }
+  </style>
+</head>
+<body>
+  <div class="nav">
+    <div><strong>🧘 YOGATUNE</strong></div>
+    <div style="display: flex; align-items: center; gap: 16px;">
+      <a href="/home">Home</a>
+      <a href="/yoga">Yoga</a>
+      <a href="/allopathic">Allopathic</a>
+      <a href="/ayurvedic">Ayurvedic</a>
+      <a class="consult-btn" href="/consult">🩺 Consult</a>
+      <a href="/logout" style="color:#d32f2f;">Logout</a>
+    </div>
+  </div>
+
+  <div class="banner">
+    <h2>Welcome {{ user }}</h2>
+    <p style="margin-top:6px;color:#555">
+      Take charge of your health — explore Yoga, Remedies, or consult a doctor.
+    </p>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h3>🧘 Yoga Therapy</h3>
+      <p>Personalized yoga poses for stress, back pain, asthma, diabetes and more.</p>
+      <a class="btn" href="/yoga">Explore Yoga →</a>
+    </div>
+
+    <div class="card">
+      <h3>💊 Allopathic Remedies</h3>
+      <p>Quick medicine suggestions for common health issues.</p>
+      <a class="btn" href="/allopathic">View Allopathic →</a>
+    </div>
+    <div class="card">
+  <h3>⚖️ BMI & Fitness</h3>
+  <p>Check your BMI and get yoga + lifestyle tips instantly.</p>
+  <a class="btn" href="/bmi">Open BMI Calculator →</a>
+</div>
+
+
+    <div class="card">
+      <h3>🌿 Ayurvedic Healing</h3>
+      <p>Natural treatments and daily tips for holistic health and well-being.</p>
+      <a class="btn" href="/ayurvedic">View Ayurvedic →</a>
+    </div>
+  </div>
+
+  <!-- Floating Consult Button (opens modal) -->
+  <a class="fab-consult" href="#" id="openConsult" aria-label="Consult a Doctor" title="Consult a Doctor">
+    <span class="dot"></span> 🩺 Consult Now
+  </a>
+
+  <!-- Back to Top Button -->
+  <a href="#" class="fab-top" id="fabTop" aria-label="Back to Top" title="Back to Top">↑ Top</a>
+
+  <!-- Consult Modal -->
+  <div id="consultModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:10000; align-items:center; justify-content:center;">
+    <div style="width:min(92vw,560px); background:#fff; border-radius:16px; box-shadow:0 16px 40px rgba(0,0,0,0.25); overflow:hidden;">
+      <div style="padding:16px 20px; display:flex; justify-content:space-between; align-items:center; background:linear-gradient(135deg,#43a047,#2e7d32); color:#fff;">
+        <strong>🩺 Book Doctor Consultation</strong>
+        <button id="closeConsult" style="background:transparent; border:none; color:#fff; font-size:22px; cursor:pointer;">×</button>
+      </div>
+      <form method="POST" action="/consult" style="padding:18px 20px;">
+        <label style="display:block; margin:8px 0 6px;">Your Name</label>
+        <input type="text" name="name" placeholder="Enter your name" required style="width:100%; padding:10px; border-radius:10px; border:1px solid #ddd;">
+
+        <label style="display:block; margin:12px 0 6px;">Disease / Problem</label>
+        <input type="text" name="disease" placeholder="e.g., back pain, diabetes" required style="width:100%; padding:10px; border-radius:10px; border:1px solid #ddd;">
+
+        <label style="display:block; margin:12px 0 6px;">Doctor Type</label>
+        <select name="doctor_type" required style="width:100%; padding:10px; border-radius:10px; border:1px solid #ddd;">
+          <option value="Allopathic">Allopathic</option>
+          <option value="Ayurvedic">Ayurvedic</option>
+        </select>
+
+        <label style="display:block; margin:12px 0 6px;">Description / Symptoms</label>
+        <textarea name="description" rows="4" placeholder="Write your symptoms (optional)" style="width:100%; padding:10px; border-radius:10px; border:1px solid #ddd;"></textarea>
+
+        <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:14px;">
+          <button type="button" id="cancelConsult" style="padding:10px 14px; border-radius:10px; border:1px solid #ddd; background:#fff; cursor:pointer;">Cancel</button>
+          <button type="submit" style="padding:10px 16px; border-radius:10px; background:#2e7d32; color:#fff; border:none; cursor:pointer;">Submit</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Back-to-top visibility + behavior
+    const fabTop = document.getElementById("fabTop");
+    window.addEventListener("scroll", () => {
+      if (window.scrollY > 200) fabTop.classList.add("show");
+      else fabTop.classList.remove("show");
+    });
+    fabTop.addEventListener("click", (e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: "smooth" }); });
+
+    // Consult modal open/close
+    const openConsult = document.getElementById("openConsult");
+    const consultModal = document.getElementById("consultModal");
+    const closeConsult = document.getElementById("closeConsult");
+    const cancelConsult = document.getElementById("cancelConsult");
+
+    function toggleConsult(show) { consultModal.style.display = show ? "flex" : "none"; }
+    openConsult?.addEventListener("click", (e) => { e.preventDefault(); toggleConsult(true); });
+    closeConsult?.addEventListener("click", () => toggleConsult(false));
+    cancelConsult?.addEventListener("click", () => toggleConsult(false));
+    consultModal?.addEventListener("click", (e) => { if (e.target === consultModal) toggleConsult(false); });
+  </script>
+</body>
+</html>

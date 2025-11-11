@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Health Care • Feedback Wall</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="navbar">
+    <div><strong>💬 Feedback Wall</strong></div>
+    <div class="navlinks">
+      <a href="/home">Home</a>
+      <a href="/dashboard">Dashboard</a>
+      <a href="/consult">Consult</a>
+      <a href="/meds">Medicine</a>
+      <a href="/chat">AI Chatbot</a>
+      <a href="/logout" class="logout">Logout</a>
+    </div>
+  </div>
+
+  <div class="panel">
+    {% if saved %}<p class="msg success">✅ Thank you! Your feedback has been saved.</p>{% endif %}
+    <form method="POST" class="form-col">
+      <textarea name="message" rows="4" placeholder="Write your feedback here..." required></textarea>
+      <button class="btn" type="submit">Submit Feedback</button>
+    </form>
+  </div>
+
+  <div class="panel">
+    <h3>Recent Feedback</h3>
+    {% if rows %}
+      <ul class="feedback-list">
+        {% for r in rows %}
+          <li><b>{{ r[0] }}</b>: {{ r[1] }} <br><span class="muted">{{ r[2] }}</span></li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="muted">No feedback yet. Be the first to share!</p>
+    {% endif %}
+  </div>
+</body>
+</html>

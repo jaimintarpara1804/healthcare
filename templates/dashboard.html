@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Health Care — Dashboard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    /* === Dashboard-only styles === */
+    .topbar {
+      position: sticky; top: 0; z-index: 50;
+      background: linear-gradient(90deg,#0b78b7,#0aa0a9);
+      color:#fff;
+      box-shadow: 0 8px 28px rgba(2,37,63,.18);
+    }
+    .topbar-wrap { max-width: 1100px; margin: 0 auto; padding: 12px 16px;
+      display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .brand { display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:.3px; }
+    .brand .logo { font-size:22px; }
+    .nav { display:flex; flex-wrap:wrap; gap:16px; }
+    .nav a { color:#eaf6ff; text-decoration:none; font-weight:600; opacity:.95; }
+    .nav a:hover { opacity:1; text-decoration:underline; }
+
+    .page { max-width:1100px; margin:28px auto; padding:0 16px 40px; }
+    .hero {
+      background: radial-gradient(1200px 280px at 10% -10%, rgba(10,160,169,.18), transparent),
+                  #ffffff;
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(3,35,54,.08);
+    }
+    .hero h2 { margin:0 0 6px; }
+    .muted { color:#667085; }
+
+    .grid {
+      display:grid; gap:18px; margin-top:20px;
+      grid-template-columns: repeat(12, 1fr);
+    }
+    .card {
+      background:#fff; border-radius:18px; padding:18px;
+      box-shadow: 0 8px 22px rgba(2,37,63,.08);
+    }
+    .stat { grid-column: span 3; display:flex; align-items:center; gap:12px; }
+    .stat .icon { font-size:26px; }
+    .stat .label { font-size:.9rem; color:#667085; }
+    .stat .value { font-size:1.4rem; font-weight:800; margin-top:2px; }
+
+    .ring {
+      grid-column: span 4; display:flex; align-items:center; justify-content:center;
+      min-height: 180px; position:relative; overflow:hidden;
+    }
+    .ring-circle {
+      --size: 140px;
+      width: var(--size); height: var(--size); border-radius: 999px;
+      background:
+        conic-gradient(#0aa0a9 calc(var(--pct)*1%), #e5eef6 0);
+      display:grid; place-items:center;
+    }
+    .ring-inner {
+      width: calc(var(--size) - 28px); height: calc(var(--size) - 28px);
+      background:#fff; border-radius:999px; display:grid; place-items:center;
+      box-shadow: inset 0 0 0 1px #edf2f7;
+    }
+    .ring-num { font-weight:800; font-size:1.6rem; }
+    .ring-caption { color:#667085; font-size:.85rem; margin-top:4px; }
+
+    .tip { grid-column: span 8; }
+    .list { grid-column: span 7; }
+    .cta { grid-column: span 5; display:grid; gap:12px; }
+
+    .list ul { list-style:none; padding:0; margin:0; }
+    .list li { padding:12px 10px; border-bottom:1px solid #eef2f7; display:flex; justify-content:space-between; gap:8px; }
+    .badge { font-size:.75rem; padding:4px 8px; border-radius:999px; background:#e8f7fb; color:#0b78b7; font-weight:700; }
+
+    .btn {
+      display:inline-flex; align-items:center; justify-content:center; gap:10px;
+      text-decoration:none; border:none; border-radius:14px; padding:14px 16px;
+      font-weight:800; cursor:pointer;
+      background:#0b78b7; color:#fff; text-align:center;
+      box-shadow: 0 10px 24px rgba(11,120,183,.2);
+    }
+    .btn.alt { background:#0aa0a9; box-shadow: 0 10px 24px rgba(10,160,169,.2); }
+    .btn:hover { filter:brightness(1.04); transform: translateY(-1px); }
+
+    footer { text-align:center; margin-top:28px; color:#8193a7; font-size:.9rem; }
+
+    @media (max-width: 1024px) {
+      .stat { grid-column: span 6; }
+      .ring { grid-column: span 6; }
+      .tip { grid-column: span 12; }
+      .list { grid-column: span 12; }
+      .cta { grid-column: span 12; }
+    }
+    @media (max-width: 560px) {
+      .stat { grid-column: span 12; }
+      .ring { grid-column: span 12; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top bar -->
+  <div class="topbar">
+    <div class="topbar-wrap">
+      <div class="brand"><span class="logo">🩺</span> <span>Health Care</span></div>
+      <nav class="nav">
+        <a href="/">Home</a>
+        <a href="/consult">Consult</a>
+        <a href="/feedback">Feedback</a>
+        <a href="/logout">Logout</a>
+      </nav>
+    </div>
+  </div>
+
+  <div class="page">
+    <div class="hero card">
+      <h2>Welcome, {{ user_email or 'Guest' }}</h2>
+      <p class="muted">Your personal wellness insights at a glance.</p>
+
+      <div class="grid">
+        <!-- Quick stats -->
+        <div class="stat card">
+          <div class="icon">🧘</div>
+          <div>
+            <div class="label">Yoga sessions</div>
+            <div class="value">{{ stats.yoga_sessions }}</div>
+          </div>
+        </div>
+
+        <div class="stat card">
+          <div class="icon">💊</div>
+          <div>
+            <div class="label">Allopathic tips</div>
+            <div class="value">{{ stats.allopathic_count }}</div>
+          </div>
+        </div>
+
+        <div class="stat card">
+          <div class="icon">🌿</div>
+          <div>
+            <div class="label">Ayurvedic tips</div>
+            <div class="value">{{ stats.ayurvedic_count }}</div>
+          </div>
+        </div>
+
+        <div class="stat card">
+          <div class="icon">📅</div>
+          <div>
+            <div class="label">Next appointment</div>
+            <div class="value">{{ next_appointment or '—' }}</div>
+          </div>
+        </div>
+
+        <!-- Wellness ring -->
+        <div class="ring card" style="--pct: {{ wellness_score or 0 }}">
+          <div class="ring-circle" style="--pct: {{ wellness_score or 0 }}">
+            <div class="ring-inner">
+              <div>
+                <div class="ring-num">{{ wellness_score or 0 }}%</div>
+                <div class="ring-caption">Wellness Score</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Daily tip -->
+        <div class="tip card">
+          <h3>Today’s Health Tip 🌿</h3>
+          <p class="muted">{{ health_tip }}</p>
+        </div>
+
+        <!-- Recent consultations -->
+        <div class="list card">
+          <h3 style="margin-top:0;">Recent Consultations 🩺</h3>
+          {% if recent_consultations %}
+          <ul>
+            {% for c in recent_consultations %}
+            <li>
+              <span><strong>{{ c.doctor }}</strong> — {{ c.topic }}</span>
+              <span class="badge">{{ c.date }}</span>
+            </li>
+            {% endfor %}
+          </ul>
+          {% else %}
+          <p class="muted">No consultations yet.</p>
+          {% endif %}
+        </div>
+
+        <!-- Quick actions -->
+        <div class="cta">
+          <a class="btn" href="/yoga">Start a Yoga Session</a>
+          <a class="btn alt" href="/bmi">Check BMI & Fitness</a>
+        </div>
+      </div>
+    </div>
+
+    <footer>© {{ year }} Health Care • Designed by Jaimin Tarpara</footer>
+  </div>
+
+  <script>
+    // Animate the wellness ring
+    const circle = document.querySelector('.ring-circle');
+    if (circle) {
+      const target = parseFloat(circle.style.getPropertyValue('--pct')) || 0;
+      let p = 0;
+      const step = () => {
+        p += (target - p) * 0.12;
+        circle.style.background = `conic-gradient(#0aa0a9 ${p}%, #e5eef6 0)`;
+        if (Math.abs(target - p) > 0.5) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    }
+  </script>
+</body>
+</html>

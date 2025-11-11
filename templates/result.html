@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Yoga Results | Health Care</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <nav>
+    <h2>🏥 Health Care</h2>
+    <ul>
+      <li><a href="{{ url_for('yoga') }}">Back</a></li>
+      <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+      <li><a href="{{ url_for('logout') }}">Logout</a></li>
+    </ul>
+  </nav>
+
+  <section class="container">
+    <h3>Suggestions for: <em>{{ disease[:60] if disease else 'your input' }}</em></h3>
+    <ul class="list">
+      {% for y in yoga_list %}
+      <li>{{ y }}</li>
+      {% endfor %}
+    </ul>
+  </section>
+</body>
+</html>

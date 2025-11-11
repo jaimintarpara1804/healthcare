@@ -277,6 +277,18 @@ def dashboard():
     )
 
 # ------------------------------ BMI / Fitness Lab ------------------------------
+# -------------------- FEEDBACK (simple stub) --------------------
+@app.route("/feedback", methods=["GET", "POST"])
+def feedback():
+    msg = None
+    if request.method == "POST":
+        name = request.form.get("name", "")
+        email = request.form.get("email", "")
+        message = request.form.get("message", "")
+        # (You can save to DB later if you want)
+        msg = "Thanks for your feedback!"
+    return render_template("feedback.html", msg=msg)
+
 
 @app.route("/bmi", methods=["GET", "POST"])
 def bmi():

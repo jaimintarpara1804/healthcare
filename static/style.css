@@ -1,269 +1,201 @@
-/* === General Styling === */
+/* ===============================
+   GLOBAL THEME - HEALTH CARE
+================================= */
 body {
-  font-family: 'Poppins', sans-serif;
-  background: linear-gradient(135deg, #fff3cd, #ffeeba);
-  text-align: center;
-  padding: 30px;
-  color: #333;
+  font-family: "Segoe UI", "Poppins", sans-serif;
+  background: linear-gradient(135deg, #e8f0ff, #f7fbff);
   margin: 0;
+  padding: 0;
+  color: #2d3748;
 }
 
-h1, h2, h3 {
-  color: #444;
-  margin-bottom: 10px;
-}
-
-a {
-  text-decoration: none;
-  color: #2e7d32;
-  font-weight: 500;
-}
-
-a:hover {
-  color: #1b5e20;
-}
-
-/* === Centered Layout for Login/Register === */
-.center {
-  margin-top: 80px;
-}
-
-/* === Inputs, Buttons, Textareas === */
-input, textarea, select {
-  padding: 10px;
-  margin: 8px;
-  border-radius: 10px;
-  border: 1px solid #ddd;
-  font-family: 'Poppins', sans-serif;
-  font-size: 15px;
-  width: 90%;
-  max-width: 320px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-  transition: 0.25s ease;
-}
-
-input:focus, textarea:focus, select:focus {
-  outline: none;
-  border-color: #f9a825;
-  box-shadow: 0 0 8px rgba(249,168,37,0.4);
-}
-
-button {
-  background: #f9a825;
-  color: white;
-  cursor: pointer;
-  border: none;
-  border-radius: 10px;
-  padding: 10px 16px;
-  margin: 8px;
-  font-weight: 600;
-  font-size: 15px;
-  transition: 0.25s ease;
-}
-
-button:hover {
-  background: #f57f17;
-  transform: scale(1.05);
-}
-
-/* === Login/Register Card === */
-form {
-  background: #fff;
-  display: inline-block;
-  padding: 20px 30px;
-  border-radius: 16px;
-  box-shadow: 0 8px 18px rgba(0,0,0,0.1);
-  margin-top: 20px;
-}
-
-p {
-  color: #555;
-}
-
-/* === Navigation Bar === */
-.navbar {
-  background: #fff;
-  padding: 14px 24px;
-  box-shadow: 0 5px 18px rgba(0,0,0,0.08);
-  border-radius: 14px;
-  max-width: 1000px;
-  margin: 0 auto 24px;
+/* ===============================
+   NAVBAR
+================================= */
+nav {
   display: flex;
   justify-content: space-between;
   align-items: center;
-}
-
-.navbar a {
-  color: #333;
-  font-weight: 600;
-  margin: 0 10px;
-}
-
-.navbar a:hover {
-  color: #f9a825;
-}
-
-/* === Cards (Used in Home Page Grid) === */
-.card {
-  background: #fff;
-  border-radius: 18px;
-  padding: 22px;
-  box-shadow: 0 6px 16px rgba(0,0,0,0.08);
-  transition: 0.25s ease;
-}
-
-.card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 10px 24px rgba(0,0,0,0.12);
-}
-
-.card h3 {
-  margin: 6px 0 8px;
-  color: #f9a825;
-}
-
-.btn {
-  display: inline-block;
-  margin-top: 10px;
-  background: #f9a825;
+  background: #0077b6;
   color: white;
-  padding: 10px 16px;
-  border-radius: 12px;
-  text-decoration: none;
+  padding: 14px 50px;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+}
+
+nav h2 {
   font-weight: 600;
-  transition: 0.25s;
+  font-size: 1.5rem;
+  letter-spacing: 1px;
 }
 
-.btn:hover {
-  background: #f57f17;
-  transform: scale(1.05);
+nav ul {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: 25px;
 }
 
-/* === Banner Section === */
-.banner {
-  max-width: 1000px;
-  margin: 0 auto 28px;
-  padding: 24px;
-  border-radius: 22px;
-  background: linear-gradient(135deg, #fff7da, #ffe4a1);
-  box-shadow: 0 10px 25px rgba(0,0,0,.08);
-}
-
-/* === Grid Layout === */
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 22px;
-  max-width: 1000px;
-  margin: 0 auto;
-}
-
-/* === Forms (Consult, Feedback, etc.) === */
-.form-box {
-  background: #fff;
-  border-radius: 18px;
-  padding: 22px;
-  box-shadow: 0 8px 20px rgba(0,0,0,.08);
-  max-width: 600px;
-  margin: 20px auto;
-  text-align: left;
-}
-
-label {
-  display: block;
-  margin-top: 10px;
-  color: #444;
+nav ul li a {
+  color: white;
+  text-decoration: none;
   font-weight: 500;
+  transition: 0.3s;
 }
 
-/* === Floating Consult Button === */
-.fab-consult {
-  position: fixed;
-  right: 22px;
-  bottom: 22px;
-  z-index: 9999;
-  background: linear-gradient(135deg, #43a047, #2e7d32);
-  color: #ffffff;
-  font-weight: 700;
-  text-decoration: none;
-  border-radius: 999px;
-  padding: 12px 18px;
-  box-shadow: 0 12px 24px rgba(46, 125, 50, 0.35);
-  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
+nav ul li a:hover {
+  color: #90e0ef;
 }
 
-.fab-consult:hover {
-  transform: translateY(-2px) scale(1.03);
-  background: linear-gradient(135deg, #2e7d32, #1b5e20);
-  box-shadow: 0 16px 28px rgba(27, 94, 32, 0.45);
+/* ===============================
+   CONTAINER + CARD STYLES
+================================= */
+.container {
+  width: 100%;
+  max-width: 600px;
+  margin: 80px auto;
+  background: white;
+  padding: 40px;
+  border-radius: 14px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  text-align: center;
 }
 
-.fab-consult .dot {
-  width: 8px;
-  height: 8px;
-  background: #c8e6c9;
-  border-radius: 50%;
-  animation: pulse 1.5s infinite;
+.container h2 {
+  color: #0077b6;
+  font-size: 1.8rem;
+  margin-bottom: 15px;
 }
 
-@keyframes pulse {
-  0% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.5); opacity: 0.6; }
-  100% { transform: scale(1); opacity: 1; }
+.container p {
+  color: #555;
+  line-height: 1.6;
 }
 
-@media (max-width: 420px) {
-  .fab-consult { right: 14px; bottom: 14px; padding: 10px 14px; }
+input, select {
+  width: 85%;
+  padding: 12px;
+  border: 1px solid #cbd5e0;
+  border-radius: 8px;
+  margin: 10px 0;
+  font-size: 1rem;
 }
 
-/* === Back to Top Button === */
-.fab-top {
-  position: fixed;
-  right: 22px;
-  bottom: 80px; /* sits above consult FAB */
-  z-index: 9998;
-  background: #ffffff;
-  color: #333;
-  font-weight: 700;
-  text-decoration: none;
-  border-radius: 999px;
-  padding: 10px 12px;
-  box-shadow: 0 10px 20px rgba(0,0,0,0.18);
-  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
-  display: none; /* hidden until scrolled */
-  align-items: center;
-  gap: 6px;
-  border: 1px solid #eee;
-  opacity: 0;
+button, .btn {
+  background: #0077b6;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.3s;
 }
 
-.fab-top.show {
-  display: inline-flex;
-  opacity: 1;
+button:hover, .btn:hover {
+  background: #023e8a;
 }
 
-.fab-top:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 14px 24px rgba(0,0,0,0.22);
+.consult-options {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 30px;
 }
 
-@media (max-width: 420px) {
-  .fab-top {
-    right: 14px;
-    bottom: 72px;
+/* ===============================
+   DASHBOARD SECTION
+================================= */
+.dashboard {
+  max-width: 800px;
+  margin: 60px auto;
+  background: white;
+  padding: 40px;
+  border-radius: 14px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  text-align: center;
+}
+
+.dashboard h3 {
+  color: #0077b6;
+  font-size: 1.6rem;
+  margin-bottom: 10px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 20px;
+  background: #e2e8f0;
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 20px 0;
+}
+
+.progress {
+  height: 100%;
+  background: linear-gradient(90deg, #0077b6, #00b4d8);
+  border-radius: 10px;
+  transition: width 0.4s ease-in-out;
+}
+html,body { background: #f2f7fb; font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji"; }
+h1,h2,h3 { color:#0b2b40; }
+.card h3 { margin: 0 0 10px; }
+
+
+/* ===============================
+   FOOTER
+================================= */
+footer {
+  text-align: center;
+  padding: 20px;
+  background: #0077b6;
+  color: white;
+  font-size: 0.9rem;
+  margin-top: 50px;
+}
+
+/* ===============================
+   RESPONSIVE
+================================= */
+@media (max-width: 768px) {
+  .container, .dashboard {
+    width: 90%;
+    padding: 20px;
+  }
+
+  nav {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
   }
 }
+/* ===== Wellness Dashboard Layout (add-on) ===== */
+.dash-wrap{max-width:1100px;margin:40px auto;padding:0 20px}
+.dash-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.dash-header h3{color:#0077b6;margin:0;font-size:1.6rem}
+.muted{color:#6b7280;margin-top:4px}
+.score-badge{background:#fff;border:1px solid #dbeafe;padding:10px 16px;border-radius:12px;text-align:right}
+.score-badge span{display:block;color:#64748b;font-size:.9rem}
+.score-badge strong{display:block;color:#0077b6;font-size:1.4rem}
 
-/* === Footer (optional) === */
-footer {
-  margin-top: 50px;
-  padding: 20px;
-  font-size: 14px;
-  color: #555;
-  background: #fff;
-  box-shadow: 0 -5px 20px rgba(0,0,0,0.05);
-  border-radius: 16px 16px 0 0;
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:18px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px}
+
+.card{background:#fff;border-radius:14px;box-shadow:0 6px 16px rgba(0,0,0,.08);padding:18px}
+.kpi{display:flex;flex-direction:column;gap:6px}
+.kpi-title{color:#64748b;font-size:.9rem}
+.kpi-value{color:#0f172a;font-weight:700;font-size:1.4rem}
+.kpi-sub{color:#9aa3af;font-size:.85rem}
+
+.label-row{display:flex;justify-content:space-between;align-items:center;margin:12px 2px 6px}
+.progress-bar{width:100%;height:14px;background:#e2e8f0;border-radius:10px;overflow:hidden}
+.progress{height:100%;background:linear-gradient(90deg,#0077b6,#00b4d8)}
+
+.tip{margin:8px 0 14px;color:#334155}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+.btn.outline{background:#fff;color:#0077b6;border:1px solid #0077b6}
+@media (max-width:900px){
+  .grid-4{grid-template-columns:1fr 1fr}
+}
+@media (max-width:600px){
+  .grid-4,.grid-2{grid-template-columns:1fr}
 }

@@ -1,34 +1,23 @@
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
+from werkzeug.security import generate_password_hash, check_password_hash
 
 db = SQLAlchemy()
 
+# ---------- User table (persistent login) ----------
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(100), unique=True, nullable=False)
+    password_hash = db.Column(db.String(200), nullable=False)
 
-# 🩺 Consultation Table
+    def set_password(self, password: str):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password: str) -> bool:
+        return check_password_hash(self.password_hash, password)
+
+# ---------- Optional: store consultation requests ----------
 class Consultation(db.Model):
-    __tablename__ = "consultations"
-
     id = db.Column(db.Integer, primary_key=True)
-    user_email = db.Column(db.String(120), nullable=False)
-    disease = db.Column(db.String(200), nullable=False)
-    doctor_type = db.Column(db.String(50), nullable=False)
-    medicine = db.Column(db.String(200))
-    notes = db.Column(db.Text)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-    def __repr__(self):
-        return f"<Consultation {self.id} - {self.disease}>"
-
-
-# 💬 Feedback Table
-class Feedback(db.Model):
-    __tablename__ = "feedback"
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    email = db.Column(db.String(120), nullable=False)
-    message = db.Column(db.Text, nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-    def __repr__(self):
-        return f"<Feedback {self.id} - {self.email}>"
+    name = db.Column(db.String(100))
+    issue = db.Column(db.String(200))
+    message = db.Column(db.Text)

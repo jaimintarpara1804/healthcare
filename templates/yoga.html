@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>YOGATUNE • Yoga Suggestions</title>
+  <title>Health Care • Yoga Suggestions</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <style>
     .wrap{max-width:900px;margin:20px auto}
@@ -12,8 +12,8 @@
     .field{display:flex;gap:10px;flex-wrap:wrap}
     input[type=text]{flex:1;min-width:260px}
     ul{list-style:disc;margin:12px 0 0 20px;text-align:left}
-    .btn{background:#f9a825;color:#fff;border:none;padding:10px 16px;border-radius:10px;cursor:pointer}
-    .btn:hover{background:#f57f17}
+    .btn{background:#1e88e5;color:#fff;border:none;padding:10px 16px;border-radius:10px;cursor:pointer}
+    .btn:hover{background:#1565c0}
   </style>
 </head>
 <body>
@@ -43,11 +43,11 @@
     </div>
   </div>
 
-  <!-- Back to Top -->
+  <a class="fab-consult" href="/consult"><span class="dot"></span> 🩺 Consult Now</a>
   <a href="#" class="fab-top" id="fabTop" title="Back to Top">↑ Top</a>
   <script>
-    const fabTop = document.getElementById("fabTop");
-    window.addEventListener("scroll", () => { if (window.scrollY > 200) fabTop.classList.add("show"); else fabTop.classList.remove("show"); });
+    const fabTop=document.getElementById("fabTop");
+    window.addEventListener("scroll",()=>{ if(window.scrollY>200) fabTop.classList.add("show"); else fabTop.classList.remove("show"); });
     fabTop.addEventListener("click",(e)=>{e.preventDefault();window.scrollTo({top:0,behavior:"smooth"});});
   </script>
 </body>

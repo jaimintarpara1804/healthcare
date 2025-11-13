@@ -2,53 +2,195 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Health Care • Yoga Suggestions</title>
+  <title>Health Care • Yoga Therapy</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <style>
-    .wrap{max-width:900px;margin:20px auto}
-    .nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
-    .nav a{color:#444;text-decoration:none;font-weight:600}
-    .panel{background:#fff;border-radius:18px;padding:22px;box-shadow:0 8px 20px rgba(0,0,0,.08)}
-    .field{display:flex;gap:10px;flex-wrap:wrap}
-    input[type=text]{flex:1;min-width:260px}
-    ul{list-style:disc;margin:12px 0 0 20px;text-align:left}
-    .btn{background:#1e88e5;color:#fff;border:none;padding:10px 16px;border-radius:10px;cursor:pointer}
-    .btn:hover{background:#1565c0}
+    .yoga-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: var(--space-lg);
+      margin-top: var(--space-xl);
+    }
+    
+    .pose-card {
+      background: white;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      text-decoration: none;
+      display: block;
+      border: 1px solid var(--gray-100);
+    }
+    
+    .pose-card:hover {
+      transform: translateY(-8px);
+      box-shadow: var(--shadow-2xl);
+    }
+    
+    .pose-image {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+    
+    .pose-content {
+      padding: var(--space-lg);
+    }
+    
+    .pose-name {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--gray-900);
+      margin-bottom: var(--space-sm);
+    }
+    
+    .pose-meta {
+      display: flex;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-md);
+      flex-wrap: wrap;
+    }
+    
+    .pose-benefits {
+      font-size: 0.9rem;
+      color: var(--gray-600);
+      line-height: 1.6;
+    }
+    
+    .search-section {
+      background: linear-gradient(135deg, rgba(22, 119, 255, 0.05), rgba(44, 189, 105, 0.05));
+      border-radius: var(--radius-xl);
+      padding: var(--space-2xl);
+      margin-bottom: var(--space-xl);
+      text-align: center;
+    }
+    
+    .search-form {
+      max-width: 600px;
+      margin: var(--space-xl) auto 0;
+      display: flex;
+      gap: var(--space-md);
+    }
+    
+    .search-form input {
+      flex: 1;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: var(--space-2xl);
+      color: var(--gray-600);
+    }
+    
+    .empty-state-icon {
+      font-size: 4rem;
+      margin-bottom: var(--space-lg);
+    }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="nav">
-      <strong>🧘 Yoga Suggestions</strong>
-      <div><a href="/home">Home</a> · <a href="/logout">Logout</a></div>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="navbar-container">
+      <a href="/home" class="navbar-brand">
+        <span class="logo">🩺</span>
+        <span>Health Care</span>
+      </a>
+      <ul class="navbar-menu">
+        <li><a href="/home">Home</a></li>
+        <li><a href="/dashboard">Dashboard</a></li>
+        <li><a href="/yoga" class="active">Yoga</a></li>
+        <li><a href="/consult">Consult</a></li>
+        <li><a href="/logout" class="btn btn-primary btn-sm">Logout</a></li>
+      </ul>
     </div>
+  </nav>
 
-    <div class="panel">
-      <form method="POST" class="field">
-        <input type="text" name="disease" placeholder="Enter disease e.g., stress, back pain, asthma" value="{{ disease or '' }}" required>
-        <button class="btn" type="submit">Get Poses</button>
-      </form>
+  <!-- Main Content -->
+  <div class="page-wrapper">
+    <div class="container">
+      <!-- Search Section -->
+      <div class="search-section animate-fade-in">
+        <h1>🧘 Yoga Therapy</h1>
+        <p class="text-muted" style="font-size: 1.1rem; margin-top: var(--space-sm);">
+          Discover yoga poses tailored to your health needs
+        </p>
+        
+        <form method="POST" class="search-form">
+          <input 
+            type="text" 
+            name="disease" 
+            class="form-input" 
+            placeholder="Enter condition (e.g., stress, back pain, asthma)" 
+            value="{{ disease or '' }}" 
+            required
+          >
+          <button type="submit" class="btn btn-primary">Find Poses</button>
+        </form>
+      </div>
 
-      {% if poses and disease %}
-        <hr>
-        <h3 style="text-align:left">Recommended for “{{ disease }}”</h3>
-        <ul>
-          {% for p in poses %}
-            <li>{{ p }}</li>
+      {% if pose_details %}
+        <!-- Results Header -->
+        <div style="margin-bottom: var(--space-xl);">
+          <h2>Recommended Poses for "{{ disease }}"</h2>
+          <p class="text-muted">{{ pose_details|length }} pose(s) found</p>
+        </div>
+
+        <!-- Yoga Poses Grid -->
+        <div class="yoga-grid">
+          {% for pose in pose_details %}
+          <a href="/yoga/{{ pose.key }}" class="pose-card">
+            <img src="{{ pose.data.image }}" alt="{{ pose.data.name }}" class="pose-image">
+            <div class="pose-content">
+              <h3 class="pose-name">{{ pose.data.name }}</h3>
+              <div class="pose-meta">
+                <span class="badge badge-primary">{{ pose.data.difficulty }}</span>
+                <span class="badge badge-info">⏱️ {{ pose.data.duration }}</span>
+              </div>
+              <div class="pose-benefits">
+                {{ pose.data.benefits[0] if pose.data.benefits else 'Great for overall wellness' }}
+              </div>
+              <div style="margin-top: var(--space-md);">
+                <span class="btn btn-sm btn-secondary" style="width: 100%;">View Details →</span>
+              </div>
+            </div>
+          </a>
           {% endfor %}
-        </ul>
+        </div>
+
       {% elif disease %}
-        <hr><p>No specific yoga found. Try consulting an instructor.</p>
+        <!-- No Results -->
+        <div class="card">
+          <div class="empty-state">
+            <div class="empty-state-icon">🔍</div>
+            <h3>No specific poses found for "{{ disease }}"</h3>
+            <p>Try searching for common conditions like stress, back pain, or asthma</p>
+            <a href="/consult" class="btn btn-primary" style="margin-top: var(--space-lg);">
+              Consult a Yoga Instructor
+            </a>
+          </div>
+        </div>
+
+      {% else %}
+        <!-- Initial State -->
+        <div class="card">
+          <div class="empty-state">
+            <div class="empty-state-icon">🧘‍♀️</div>
+            <h3>Start Your Yoga Journey</h3>
+            <p>Enter a health condition above to get personalized yoga recommendations</p>
+          </div>
+        </div>
       {% endif %}
     </div>
   </div>
 
-  <a class="fab-consult" href="/consult"><span class="dot"></span> 🩺 Consult Now</a>
-  <a href="#" class="fab-top" id="fabTop" title="Back to Top">↑ Top</a>
-  <script>
-    const fabTop=document.getElementById("fabTop");
-    window.addEventListener("scroll",()=>{ if(window.scrollY>200) fabTop.classList.add("show"); else fabTop.classList.remove("show"); });
-    fabTop.addEventListener("click",(e)=>{e.preventDefault();window.scrollTo({top:0,behavior:"smooth"});});
-  </script>
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <p class="footer-text">© 2024 Health Care • Your Trusted Wellness Partner</p>
+    </div>
+  </footer>
 </body>
 </html>

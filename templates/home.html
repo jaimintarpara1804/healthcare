@@ -2,80 +2,282 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Home</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Health Care - Your Wellness Partner</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <style>
-    /* Minimal styles just for the home tiles */
-    .home-wrap { max-width: 1100px; margin: 40px auto; padding: 0 16px; }
-    .hero {
-      background: #fff; border-radius: 16px; padding: 28px; text-align: center;
-      box-shadow: 0 10px 25px rgba(0,0,0,.08);
-    }
-    .tiles {
-      display: grid; grid-template-columns: repeat( auto-fit, minmax(220px, 1fr) );
-      gap: 18px; margin-top: 22px;
-    }
-    .tile {
-      display: block; text-decoration: none; background: #ffffff; padding: 22px; border-radius: 16px;
-      box-shadow: 0 8px 20px rgba(0,0,0,.06); transition: transform .08s ease, box-shadow .08s ease;
+    .hero-section {
+      background: linear-gradient(135deg, rgba(22, 119, 255, 0.05) 0%, rgba(44, 189, 105, 0.05) 100%);
+      border-radius: var(--radius-xl);
+      padding: var(--space-2xl);
       text-align: center;
+      margin-bottom: var(--space-2xl);
+      border: 1px solid var(--gray-200);
     }
-    .tile:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(0,0,0,.10); }
-    .tile h3 { margin: 8px 0 6px; font-size: 1.1rem; }
-    .tile p { margin: 0; font-size: .9rem; color:#667085; }
-    .emoji { font-size: 28px; }
+    
+    .hero-title {
+      font-size: 2.5rem;
+      background: linear-gradient(135deg, var(--primary-600), var(--accent-600));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: var(--space-md);
+    }
+    
+    .hero-subtitle {
+      font-size: 1.25rem;
+      color: var(--gray-600);
+      max-width: 600px;
+      margin: 0 auto var(--space-lg);
+    }
+    
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: var(--space-lg);
+      margin-top: var(--space-xl);
+    }
+    
+    .feature-card {
+      background: white;
+      border-radius: var(--radius-lg);
+      padding: var(--space-xl);
+      text-align: center;
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--gray-100);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      text-decoration: none;
+      display: block;
+    }
+    
+    .feature-card:hover {
+      transform: translateY(-8px);
+      box-shadow: var(--shadow-2xl);
+      border-color: var(--primary-200);
+    }
+    
+    .feature-icon {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto var(--space-lg);
+      background: linear-gradient(135deg, var(--primary-50), var(--accent-50));
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      transition: all 0.3s ease;
+    }
+    
+    .feature-card:hover .feature-icon {
+      transform: scale(1.1) rotate(5deg);
+    }
+    
+    .feature-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--gray-900);
+      margin-bottom: var(--space-sm);
+    }
+    
+    .feature-description {
+      font-size: 0.95rem;
+      color: var(--gray-600);
+      line-height: 1.6;
+    }
+    
+    .quick-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: var(--space-lg);
+      margin: var(--space-2xl) 0;
+    }
+    
+    .stat-box {
+      background: white;
+      padding: var(--space-lg);
+      border-radius: var(--radius-lg);
+      text-align: center;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--gray-100);
+    }
+    
+    .stat-number {
+      font-size: 2.5rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--primary-600), var(--accent-600));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .stat-label {
+      font-size: 0.9rem;
+      color: var(--gray-600);
+      margin-top: var(--space-sm);
+    }
+    
+    .cta-section {
+      background: linear-gradient(135deg, var(--primary-600), var(--accent-600));
+      color: white;
+      padding: var(--space-2xl);
+      border-radius: var(--radius-xl);
+      text-align: center;
+      margin-top: var(--space-2xl);
+    }
+    
+    .cta-section h2 {
+      color: white;
+      margin-bottom: var(--space-md);
+    }
+    
+    .cta-section p {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 1.1rem;
+      margin-bottom: var(--space-lg);
+    }
+    
+    .btn-white {
+      background: white;
+      color: var(--primary-600);
+      font-weight: 700;
+    }
+    
+    .btn-white:hover {
+      background: var(--gray-50);
+      transform: translateY(-2px);
+    }
   </style>
 </head>
 <body>
-  <div class="home-wrap">
-    <div class="hero">
-      <h2>Welcome{% if session.get('user') %} {{ session['user'] }}{% endif %}</h2>
-      <p>Select a module to continue</p>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="navbar-container">
+      <a href="/home" class="navbar-brand">
+        <span class="logo">🩺</span>
+        <span>Health Care</span>
+      </a>
+      <ul class="navbar-menu">
+        <li><a href="/home" class="active">Home</a></li>
+        <li><a href="/dashboard">Dashboard</a></li>
+        <li><a href="/symptom_checker">Symptom Checker</a></li>
+        <li><a href="/consult">Consult</a></li>
+        <li><a href="/feedback">Feedback</a></li>
+        <li><a href="/logout" class="btn btn-primary btn-sm">Logout</a></li>
+      </ul>
+    </div>
+  </nav>
 
-      <div class="tiles">
-        <!-- If your route paths are different, just change the href values -->
-        <a class="tile" href="/dashboard">
-          <div class="emoji">📊</div>
-          <h3>Dashboard</h3>
-          <p>Your wellness overview</p>
+  <!-- Main Content -->
+  <div class="page-wrapper">
+    <div class="container">
+      <!-- Hero Section -->
+      <div class="hero-section animate-fade-in">
+        <h1 class="hero-title">Welcome{% if session.get('user') %}, {{ session['user'] }}{% endif %}! 👋</h1>
+        <p class="hero-subtitle">Your complete healthcare companion for wellness, consultations, and personalized health insights</p>
+        <div class="flex justify-center gap-3" style="margin-top: var(--space-xl);">
+          <a href="/dashboard" class="btn btn-primary btn-lg">View Dashboard</a>
+          <a href="/symptom_checker" class="btn btn-success btn-lg">Check Symptoms</a>
+        </div>
+      </div>
+
+      <!-- Quick Stats -->
+      <div class="quick-stats">
+        <div class="stat-box">
+          <div class="stat-number">24/7</div>
+          <div class="stat-label">Available Support</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-number">100+</div>
+          <div class="stat-label">Health Conditions</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-number">50+</div>
+          <div class="stat-label">Yoga Poses</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-number">1000+</div>
+          <div class="stat-label">Happy Users</div>
+        </div>
+      </div>
+
+      <!-- Features Grid -->
+      <div class="feature-grid">
+        <a href="/dashboard" class="feature-card">
+          <div class="feature-icon">📊</div>
+          <h3 class="feature-title">Wellness Dashboard</h3>
+          <p class="feature-description">Track your health metrics, wellness score, and get personalized insights</p>
         </a>
 
-        <a class="tile" href="/yoga">
-          <div class="emoji">🧘</div>
-          <h3>Yoga Suggestions</h3>
-          <p>Poses & routines</p>
+        <a href="/symptom_checker" class="feature-card">
+          <div class="feature-icon">🩺</div>
+          <h3 class="feature-title">Symptom Checker</h3>
+          <p class="feature-description">Analyze your symptoms and get possible conditions with specialist recommendations</p>
         </a>
 
-        <a class="tile" href="/allopathic">
-          <div class="emoji">💊</div>
-          <h3>Allopathic</h3>
-          <p>General advice</p>
+        <a href="/yoga" class="feature-card">
+          <div class="feature-icon">🧘</div>
+          <h3 class="feature-title">Yoga Therapy</h3>
+          <p class="feature-description">Discover yoga poses and routines tailored to your health conditions</p>
         </a>
 
-        <a class="tile" href="/ayurvedic">
-          <div class="emoji">🌿</div>
-          <h3>Ayurvedic</h3>
-          <p>Natural remedies</p>
+        <a href="/allopathic" class="feature-card">
+          <div class="feature-icon">💊</div>
+          <h3 class="feature-title">Allopathic Medicine</h3>
+          <p class="feature-description">Get evidence-based medical advice and treatment recommendations</p>
         </a>
 
-        <a class="tile" href="/bmi">
-          <div class="emoji">⚖️</div>
-          <h3>BMI & Fitness</h3>
-          <p>BMI, BMR, calories</p>
+        <a href="/ayurvedic" class="feature-card">
+          <div class="feature-icon">🌿</div>
+          <h3 class="feature-title">Ayurvedic Remedies</h3>
+          <p class="feature-description">Explore natural healing with traditional Ayurvedic treatments</p>
         </a>
 
-        <a class="tile" href="/consult">
-          <div class="emoji">👩‍⚕️</div>
-          <h3>Consult</h3>
-          <p>Doctor consultation</p>
+        <a href="/bmi" class="feature-card">
+          <div class="feature-icon">⚖️</div>
+          <h3 class="feature-title">BMI & Fitness</h3>
+          <p class="feature-description">Calculate BMI, BMR, TDEE and get personalized fitness recommendations</p>
+        </a>
+
+        <a href="/consult" class="feature-card">
+          <div class="feature-icon">👨‍⚕️</div>
+          <h3 class="feature-title">Doctor Consultation</h3>
+          <p class="feature-description">Book appointments with qualified healthcare professionals</p>
+        </a>
+
+        <a href="/feedback" class="feature-card">
+          <div class="feature-icon">💬</div>
+          <h3 class="feature-title">Feedback</h3>
+          <p class="feature-description">Share your experience and help us improve our services</p>
         </a>
       </div>
 
-      <p style="margin-top:20px;">
-        <a href="/logout">Logout</a>
-      </p>
+      <!-- CTA Section -->
+      <div class="cta-section">
+        <h2>Ready to Start Your Wellness Journey?</h2>
+        <p>Get personalized health insights and expert recommendations today</p>
+        <a href="/symptom_checker" class="btn btn-white btn-lg">Get Started Now</a>
+      </div>
     </div>
   </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <p class="footer-text">© {{ "now"|default("2024") }} Health Care • Your Trusted Wellness Partner</p>
+      <div class="footer-links">
+        <a href="/home">Home</a>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/consult">Consultations</a>
+        <a href="/feedback">Feedback</a>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+      </div>
+      <p class="footer-text" style="margin-top: var(--space-md); font-size: 0.85rem;">
+        Designed with ❤️ by Jaimin Tarpara
+      </p>
+    </div>
+  </footer>
 </body>
 </html>

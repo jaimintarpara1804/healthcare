@@ -6,66 +6,249 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <style>
-    .wrap { min-height: 100vh; display: grid; place-items: center; }
-    .card { width: min(92vw, 460px); background: #fff; border-radius: 22px; padding: 26px; box-shadow: 0 14px 32px rgba(0,0,0,.12); text-align: center; }
-    .brand { display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom: 8px; }
-    .brand b { font-size: 22px; }
-    .sub { color:#666; font-size: 14px; margin-bottom: 12px; }
-    .msg { margin: 6px 0 12px; color:#2e7d32; font-weight:600; }
-    .error { color:#d32f2f; }
-    .row { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
-    .row input { max-width: 100%; width: 100%; }
-    .actions { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top: 8px; }
-    .divider { margin: 12px 0; color:#aaa; font-size: 12px; }
-    .muted { color:#777; font-size: 12px; margin-top: 10px; }
-    .toggle-eye { position: absolute; right: 18px; top: 50%; transform: translateY(-50%); cursor: pointer; user-select: none; color:#888; font-size: 14px; }
-    .password-wrap { position: relative; display: inline-block; width: 100%; }
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-lg);
+    }
+    
+    .login-container {
+      width: 100%;
+      max-width: 480px;
+    }
+    
+    .login-card {
+      background: white;
+      border-radius: var(--radius-xl);
+      padding: var(--space-2xl);
+      box-shadow: var(--shadow-2xl);
+      animation: fadeIn 0.5s ease-out;
+    }
+    
+    .brand-section {
+      text-align: center;
+      margin-bottom: var(--space-xl);
+    }
+    
+    .brand-logo {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto var(--space-md);
+      background: linear-gradient(135deg, var(--primary-500), var(--accent-500));
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      box-shadow: var(--shadow-lg);
+    }
+    
+    .brand-title {
+      font-size: 2rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--primary-600), var(--accent-600));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: var(--space-xs);
+    }
+    
+    .brand-subtitle {
+      color: var(--gray-600);
+      font-size: 0.95rem;
+    }
+    
+    .alert-message {
+      padding: var(--space-md);
+      border-radius: var(--radius-md);
+      margin-bottom: var(--space-lg);
+      font-weight: 600;
+      text-align: center;
+    }
+    
+    .alert-success {
+      background: var(--accent-50);
+      color: var(--accent-700);
+      border: 1px solid var(--accent-200);
+    }
+    
+    .alert-error {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+    }
+    
+    .form-group {
+      margin-bottom: var(--space-lg);
+    }
+    
+    .password-wrapper {
+      position: relative;
+    }
+    
+    .password-toggle {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: var(--gray-500);
+      font-size: 0.875rem;
+      font-weight: 600;
+      user-select: none;
+      transition: color 0.2s;
+    }
+    
+    .password-toggle:hover {
+      color: var(--primary-600);
+    }
+    
+    .button-group {
+      display: flex;
+      gap: var(--space-md);
+      margin-bottom: var(--space-lg);
+    }
+    
+    .button-group .btn {
+      flex: 1;
+    }
+    
+    .divider {
+      text-align: center;
+      margin: var(--space-lg) 0;
+      position: relative;
+    }
+    
+    .divider::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      width: 100%;
+      height: 1px;
+      background: var(--gray-200);
+    }
+    
+    .divider-text {
+      position: relative;
+      display: inline-block;
+      padding: 0 var(--space-md);
+      background: white;
+      color: var(--gray-500);
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+    
+    .forgot-link {
+      text-align: center;
+    }
+    
+    .forgot-link a {
+      color: var(--primary-600);
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+    
+    .footer-note {
+      text-align: center;
+      margin-top: var(--space-xl);
+      color: var(--gray-600);
+      font-size: 0.875rem;
+    }
+    
+    @media (max-width: 640px) {
+      .button-group {
+        flex-direction: column;
+      }
+    }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="card">
-      <div class="brand">
-        <span style="font-size:24px">🩺</span>
-        <b>Health Care</b>
+  <div class="login-container">
+    <div class="login-card">
+      <!-- Brand Section -->
+      <div class="brand-section">
+        <div class="brand-logo">🩺</div>
+        <h1 class="brand-title">Health Care</h1>
+        <p class="brand-subtitle">Your Trusted Wellness Partner</p>
       </div>
-      <p class="sub">Welcome! Log in or create a new account to continue.</p>
 
+      <!-- Alert Messages -->
       {% if msg %}
-        <div class="msg {{ 'error' if 'Invalid' in msg or 'exists' in msg else '' }}">{{ msg }}</div>
+        <div class="alert-message {{ 'alert-error' if 'Invalid' in msg or 'exists' in msg or 'Please' in msg else 'alert-success' }}">
+          {{ msg }}
+        </div>
       {% endif %}
 
-      <form method="POST" autocomplete="off" novalidate>
-        <div class="row">
-          <input type="email" name="email" placeholder="Email address" required>
+      <!-- Login/Register Form -->
+      <form method="POST" autocomplete="off">
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input 
+            type="email" 
+            name="email" 
+            class="form-input" 
+            placeholder="Enter your email"
+            required
+            autocomplete="email"
+          >
         </div>
 
-        <div class="row">
-          <div class="password-wrap">
-            <input id="pwd" type="password" name="password" placeholder="Password" required>
-            <span id="togglePwd" class="toggle-eye">Show</span>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <div class="password-wrapper">
+            <input 
+              id="password" 
+              type="password" 
+              name="password" 
+              class="form-input" 
+              placeholder="Enter your password"
+              required
+              autocomplete="current-password"
+            >
+            <span id="togglePassword" class="password-toggle">Show</span>
           </div>
         </div>
 
-        <div class="actions">
-          <button name="action" value="login" type="submit">Log In</button>
-          <button name="action" value="register" type="submit" style="background:#43a047">Create Account</button>
+        <div class="button-group">
+          <button type="submit" name="action" value="login" class="btn btn-primary">
+            Log In
+          </button>
+          <button type="submit" name="action" value="register" class="btn btn-success">
+            Create Account
+          </button>
         </div>
 
-        <div class="divider">— or —</div>
-        <a class="btn" href="/forgot">Forgot password?</a>
+        <div class="divider">
+          <span class="divider-text">Need Help?</span>
+        </div>
+
+        <div class="forgot-link">
+          <a href="/forgot">Forgot your password?</a>
+        </div>
       </form>
+
+      <div class="footer-note">
+        By continuing, you agree to our Terms of Service and Privacy Policy
+      </div>
     </div>
   </div>
 
   <script>
-    const pwd = document.getElementById("pwd");
-    const toggle = document.getElementById("togglePwd");
-    toggle?.addEventListener("click", () => {
-      const isHidden = pwd.type === "password";
-      pwd.type = isHidden ? "text" : "password";
-      toggle.textContent = isHidden ? "Hide" : "Show";
-    });
+    // Password toggle functionality
+    const passwordInput = document.getElementById('password');
+    const toggleButton = document.getElementById('togglePassword');
+    
+    if (toggleButton && passwordInput) {
+      toggleButton.addEventListener('click', function() {
+        const type = passwordInput.type === 'password' ? 'text' : 'password';
+        passwordInput.type = type;
+        toggleButton.textContent = type === 'password' ? 'Show' : 'Hide';
+      });
+    }
   </script>
 </body>
 </html>

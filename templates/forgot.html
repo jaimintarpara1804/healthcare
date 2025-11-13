@@ -1,28 +1,215 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Health Care • Forgot Password</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-lg);
+    }
+    
+    .forgot-container {
+      width: 100%;
+      max-width: 480px;
+    }
+    
+    .forgot-card {
+      background: white;
+      border-radius: var(--radius-xl);
+      padding: var(--space-2xl);
+      box-shadow: var(--shadow-2xl);
+      animation: fadeIn 0.5s ease-out;
+    }
+    
+    .header-section {
+      text-align: center;
+      margin-bottom: var(--space-xl);
+    }
+    
+    .icon-circle {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto var(--space-md);
+      background: linear-gradient(135deg, var(--primary-500), var(--accent-500));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      box-shadow: var(--shadow-lg);
+    }
+    
+    .page-title {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--gray-900);
+      margin-bottom: var(--space-xs);
+    }
+    
+    .page-subtitle {
+      color: var(--gray-600);
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+    
+    .alert-message {
+      padding: var(--space-md);
+      border-radius: var(--radius-md);
+      margin-bottom: var(--space-lg);
+      font-weight: 600;
+      text-align: center;
+    }
+    
+    .alert-success {
+      background: var(--accent-50);
+      color: var(--accent-700);
+      border: 1px solid var(--accent-200);
+    }
+    
+    .alert-error {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+    }
+    
+    .code-display {
+      background: var(--primary-50);
+      border: 2px dashed var(--primary-300);
+      border-radius: var(--radius-lg);
+      padding: var(--space-xl);
+      margin: var(--space-lg) 0;
+      text-align: center;
+    }
+    
+    .code-label {
+      color: var(--primary-700);
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: var(--space-sm);
+    }
+    
+    .code-value {
+      font-family: 'Courier New', monospace;
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--primary-600);
+      letter-spacing: 0.25em;
+      margin: var(--space-md) 0;
+    }
+    
+    .code-instructions {
+      color: var(--gray-700);
+      font-size: 0.875rem;
+      margin-top: var(--space-md);
+      line-height: 1.5;
+    }
+    
+    .code-instructions a {
+      color: var(--primary-600);
+      font-weight: 600;
+      text-decoration: none;
+    }
+    
+    .code-instructions a:hover {
+      text-decoration: underline;
+    }
+    
+    .form-group {
+      margin-bottom: var(--space-lg);
+    }
+    
+    .back-link {
+      text-align: center;
+      margin-top: var(--space-lg);
+    }
+    
+    .back-link a {
+      color: var(--primary-600);
+      font-weight: 600;
+      font-size: 0.95rem;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    
+    .back-link a:hover {
+      color: var(--primary-700);
+    }
+    
+    .action-buttons {
+      display: flex;
+      gap: var(--space-md);
+      margin-top: var(--space-lg);
+    }
+    
+    .action-buttons .btn {
+      flex: 1;
+    }
+  </style>
 </head>
 <body>
-  <h2>🔐 Forgot Password</h2>
-  <p>Enter your registered email. We’ll generate a reset code (shown here for demo).</p>
+  <div class="forgot-container">
+    <div class="forgot-card">
+      <!-- Header Section -->
+      <div class="header-section">
+        <div class="icon-circle">🔑</div>
+        <h1 class="page-title">Forgot Password?</h1>
+        <p class="page-subtitle">No worries! Enter your email and we'll generate a reset code for you</p>
+      </div>
 
-  {% if info %}<p style="color:#2e7d32"><b>{{ info }}</b></p>{% endif %}
-  {% if code %}
-    <div class="form-box">
-      <p><b>Your reset code:</b> <span style="font-family:monospace">{{ code }}</span></p>
-      <p>Now go to <a href="/reset">Reset Password</a> and enter this code.</p>
+      <!-- Alert Messages -->
+      {% if info and not code %}
+        <div class="alert-message {{ 'alert-success' if 'generated' in info else 'alert-error' }}">
+          {{ info }}
+        </div>
+      {% endif %}
+
+      <!-- Code Display (if generated) -->
+      {% if code %}
+        <div class="code-display">
+          <div class="code-label">✨ Your Reset Code</div>
+          <div class="code-value">{{ code }}</div>
+          <div class="code-instructions">
+            <p>⏱️ This code expires in <strong>15 minutes</strong></p>
+            <p>Copy this code and use it on the <a href="/reset">Reset Password</a> page</p>
+          </div>
+        </div>
+        
+        <div class="action-buttons">
+          <a href="/reset" class="btn btn-primary">Reset Password Now</a>
+          <a href="/login_register" class="btn btn-secondary">Back to Login</a>
+        </div>
+      {% else %}
+        <!-- Email Form -->
+        <form method="POST">
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <input 
+              type="email" 
+              name="email" 
+              class="form-input" 
+              placeholder="Enter your registered email"
+              value="{{ email }}"
+              required
+            >
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%;">
+            Generate Reset Code
+          </button>
+        </form>
+
+        <div class="back-link">
+          <a href="/login_register">← Back to Login</a>
+        </div>
+      {% endif %}
     </div>
-  {% endif %}
-
-  <form method="POST" class="form-box" style="text-align:center">
-    <label>Email</label>
-    <input type="email" name="email" placeholder="your@email.com" required>
-    <button type="submit">Generate Reset Code</button>
-  </form>
-
-  <p style="margin-top:10px"><a href="/login_register">← Back to Login</a></p>
+  </div>
 </body>
 </html>

@@ -1,27 +1,252 @@
 <!DOCTYPE html>
-<html><head>
-<meta charset="utf-8"><title>Health Care • Allopathic Remedies</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-<style>.wrap{max-width:800px;margin:24px auto}.panel{background:#fff;border-radius:18px;padding:22px;box-shadow:0 8px 20px rgba(0,0,0,.08)}.btn{background:#1e88e5;color:#fff;border:none;padding:10px 16px;border-radius:10px;cursor:pointer}.btn:hover{background:#1565c0}</style>
-</head><body>
-<div class="wrap">
-  <h2>💊 Allopathic Remedies</h2>
-  <div class="panel">
-    <form method="POST" style="display:flex;gap:10px;flex-wrap:wrap">
-      <input type="text" name="disease" placeholder="Enter disease e.g., fever, cold, diabetes" value="{{ disease or '' }}" required>
-      <button class="btn" type="submit">Get Suggestion</button>
-    </form>
-    {% if suggestion is not none %}
-      <hr><p><b>Suggestion:</b> {{ suggestion }}</p>
-    {% endif %}
-    <p style="margin-top:10px"><a href="/home">← Back to Home</a></p>
-  </div>
-</div>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Health Care • Allopathic Medicine</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    .medicine-card {
+      background: white;
+      border-radius: var(--radius-lg);
+      padding: var(--space-xl);
+      box-shadow: var(--shadow-lg);
+      margin-top: var(--space-xl);
+      border: 1px solid var(--gray-100);
+    }
+    
+    .medicine-header {
+      display: flex;
+      gap: var(--space-xl);
+      align-items: flex-start;
+      margin-bottom: var(--space-xl);
+    }
+    
+    .medicine-image-container {
+      flex-shrink: 0;
+    }
+    
+    .medicine-image {
+      width: 200px;
+      height: 200px;
+      object-fit: cover;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+    }
+    
+    .medicine-info {
+      flex: 1;
+    }
+    
+    .medicine-name {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--primary-600);
+      margin-bottom: var(--space-sm);
+    }
+    
+    .medicine-type {
+      color: var(--gray-600);
+      font-size: 1rem;
+      margin-bottom: var(--space-md);
+    }
+    
+    .quick-info {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: var(--space-md);
+      margin-top: var(--space-lg);
+    }
+    
+    .quick-info-item {
+      background: var(--gray-50);
+      padding: var(--space-md);
+      border-radius: var(--radius-md);
+    }
+    
+    .quick-info-label {
+      font-size: 0.875rem;
+      color: var(--gray-600);
+      margin-bottom: var(--space-xs);
+    }
+    
+    .quick-info-value {
+      font-weight: 700;
+      color: var(--gray-900);
+    }
+    
+    .search-section {
+      background: linear-gradient(135deg, rgba(22, 119, 255, 0.05), rgba(44, 189, 105, 0.05));
+      border-radius: var(--radius-xl);
+      padding: var(--space-2xl);
+      margin-bottom: var(--space-xl);
+      text-align: center;
+    }
+    
+    .search-form {
+      max-width: 600px;
+      margin: var(--space-xl) auto 0;
+      display: flex;
+      gap: var(--space-md);
+    }
+    
+    .search-form input {
+      flex: 1;
+    }
+    
+    @media (max-width: 768px) {
+      .medicine-header {
+        flex-direction: column;
+      }
+      
+      .medicine-image {
+        width: 100%;
+        max-width: 300px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="navbar-container">
+      <a href="/home" class="navbar-brand">
+        <span class="logo">🩺</span>
+        <span>Health Care</span>
+      </a>
+      <ul class="navbar-menu">
+        <li><a href="/home">Home</a></li>
+        <li><a href="/dashboard">Dashboard</a></li>
+        <li><a href="/allopathic" class="active">Medicine</a></li>
+        <li><a href="/consult">Consult</a></li>
+        <li><a href="/logout" class="btn btn-primary btn-sm">Logout</a></li>
+      </ul>
+    </div>
+  </nav>
 
-<a href="#" class="fab-top" id="fabTop" title="Back to Top">↑ Top</a>
-<script>
-  const fabTop=document.getElementById("fabTop");
-  window.addEventListener("scroll",()=>{if(window.scrollY>200)fabTop.classList.add("show");else fabTop.classList.remove("show");});
-  fabTop.addEventListener("click",(e)=>{e.preventDefault();window.scrollTo({top:0,behavior:"smooth"});});
-</script>
-</body></html>
+  <!-- Main Content -->
+  <div class="page-wrapper">
+    <div class="container-md">
+      <!-- Search Section -->
+      <div class="search-section animate-fade-in">
+        <h1>💊 Allopathic Medicine</h1>
+        <p class="text-muted" style="font-size: 1.1rem; margin-top: var(--space-sm);">
+          Get evidence-based medical recommendations for common conditions
+        </p>
+        
+        <form method="POST" class="search-form">
+          <input 
+            type="text" 
+            name="disease" 
+            class="form-input" 
+            placeholder="Enter condition (e.g., fever, cold, diabetes)" 
+            value="{{ disease or '' }}" 
+            required
+          >
+          <button type="submit" class="btn btn-primary">Get Recommendation</button>
+        </form>
+      </div>
+
+      {% if suggestion %}
+        <!-- Suggestion Card -->
+        <div class="card">
+          <h2 style="margin-bottom: var(--space-lg);">📋 Medical Recommendation</h2>
+          <div class="alert alert-info">
+            <strong>For {{ disease|title }}:</strong><br>
+            {{ suggestion }}
+          </div>
+        </div>
+
+        {% if medicine_details %}
+          <!-- Medicine Details Card -->
+          <div class="medicine-card">
+            <div class="medicine-header">
+              <div class="medicine-image-container">
+                <img src="{{ medicine_details.image }}" alt="{{ medicine_details.name }}" class="medicine-image">
+              </div>
+              <div class="medicine-info">
+                <h2 class="medicine-name">{{ medicine_details.name }}</h2>
+                <p class="medicine-type">{{ medicine_details.type }}</p>
+                <p class="text-muted">{{ medicine_details.generic_name }}</p>
+                
+                <div class="quick-info">
+                  <div class="quick-info-item">
+                    <div class="quick-info-label">Standard Dose</div>
+                    <div class="quick-info-value">{{ medicine_details.dosage }}</div>
+                  </div>
+                  <div class="quick-info-item">
+                    <div class="quick-info-label">Max Daily</div>
+                    <div class="quick-info-value">{{ medicine_details.max_daily }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Uses -->
+            <div style="margin-bottom: var(--space-lg);">
+              <h3 style="margin-bottom: var(--space-md);">Common Uses</h3>
+              <div style="display: flex; gap: var(--space-sm); flex-wrap: wrap;">
+                {% for use in medicine_details.uses %}
+                <span class="badge badge-primary">{{ use }}</span>
+                {% endfor %}
+              </div>
+            </div>
+
+            <!-- Side Effects -->
+            <div style="margin-bottom: var(--space-lg);">
+              <h3 style="margin-bottom: var(--space-md);">Possible Side Effects</h3>
+              <ul style="color: var(--gray-700);">
+                {% for effect in medicine_details.side_effects %}
+                <li>{{ effect }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+
+            <!-- Precautions -->
+            <div class="alert alert-warning">
+              <strong>⚠️ Important Precautions:</strong>
+              <ul style="margin: var(--space-sm) 0 0 var(--space-lg);">
+                {% for precaution in medicine_details.precautions %}
+                <li>{{ precaution }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+
+            <!-- Action Button -->
+            <div style="text-align: center; margin-top: var(--space-xl);">
+              <a href="/medicine/{{ medicine_details.name.lower() }}" class="btn btn-primary">
+                View Full Details →
+              </a>
+            </div>
+          </div>
+        {% endif %}
+
+        <!-- Disclaimer -->
+        <div class="alert alert-error" style="margin-top: var(--space-xl);">
+          <strong>🚨 Medical Disclaimer:</strong><br>
+          This information is for educational purposes only. Always consult a qualified healthcare provider before taking any medication. Do not self-medicate.
+        </div>
+
+      {% elif disease %}
+        <!-- No Results -->
+        <div class="card">
+          <div style="text-align: center; padding: var(--space-2xl);">
+            <div style="font-size: 4rem; margin-bottom: var(--space-lg);">🔍</div>
+            <h3>No recommendation found for "{{ disease }}"</h3>
+            <p class="text-muted">Try searching for common conditions like fever, cold, or headache</p>
+            <a href="/consult" class="btn btn-primary" style="margin-top: var(--space-lg);">
+              Consult a Doctor
+            </a>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <p class="footer-text">© 2024 Health Care • Your Trusted Wellness Partner</p>
+    </div>
+  </footer>
+</body>
+</html>

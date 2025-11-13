@@ -1,13 +1,29 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 from yoga_suggestions import suggest_yoga
+from yoga_data import YOGA_POSES, MEDICINE_DATABASE
+from models import db, User
 import os, random, time
 from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = "healthcare_secret"
 
-# ---------------- In-memory demo stores (reset on server restart) ----------------
-users = {}           # {email: password}
+# Ensure instance folder exists
+instance_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'instance')
+os.makedirs(instance_path, exist_ok=True)
+
+# Use absolute path for database
+db_path = os.path.join(instance_path, 'users.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db.init_app(app)
+
+# Create tables
+with app.app_context():
+    db.create_all()
+
+# ---------------- Reset tokens (in-memory for demo) ----------------
 reset_tokens = {}    # {email: {"code": "123456", "expires": <epoch>}}
 
 # --------------------------------- Helpers --------------------------------------
@@ -86,13 +102,22 @@ def login_register():
         if action == "register":
             if not email or not password:
                 msg = "Please enter both email and password."
-            elif email in users:
-                msg = "User already exists!"
             else:
-                users[email] = password
-                msg = "Registered successfully! Please log in."
+                # Check if user already exists
+                existing_user = User.query.filter_by(email=email).first()
+                if existing_user:
+                    msg = "User already exists!"
+                else:
+                    # Create new user with hashed password
+                    new_user = User(email=email)
+                    new_user.set_password(password)
+                    db.session.add(new_user)
+                    db.session.commit()
+                    msg = "Registered successfully! Please log in."
         elif action == "login":
-            if email in users and users[email] == password:
+            # Find user in database
+            user = User.query.filter_by(email=email).first()
+            if user and user.check_password(password):
                 session["user"] = email
                 return redirect(url_for("home"))
             else:
@@ -115,15 +140,18 @@ def forgot():
         email_entered = (request.form.get("email") or "").strip().lower()
         if not email_entered:
             info = "Please enter your email."
-        elif email_entered not in users:
-            info = "No account found with that email."
         else:
-            code_generated = f"{random.randint(0, 999999):06d}"
-            reset_tokens[email_entered] = {
-                "code": code_generated,
-                "expires": time.time() + 15 * 60  # 15 minutes
-            }
-            info = "Reset code generated. Use it within 15 minutes."
+            # Check if user exists in database
+            user = User.query.filter_by(email=email_entered).first()
+            if not user:
+                info = "No account found with that email."
+            else:
+                code_generated = f"{random.randint(0, 999999):06d}"
+                reset_tokens[email_entered] = {
+                    "code": code_generated,
+                    "expires": time.time() + 15 * 60  # 15 minutes
+                }
+                info = "Reset code generated. Use it within 15 minutes."
     return render_template("forgot.html", info=info, code=code_generated, email=email_entered, brand="Health Care")
 
 @app.route("/reset", methods=["GET", "POST"])
@@ -149,13 +177,18 @@ def reset():
                 msg = "Reset code expired. Please generate a new code."
             elif code != saved["code"]:
                 msg = "Invalid code."
-            elif email not in users:
-                msg = "Account not found."
             else:
-                users[email] = new_pwd
-                reset_tokens.pop(email, None)
-                success = True
-                msg = "Password updated. You can now log in."
+                # Find user in database
+                user = User.query.filter_by(email=email).first()
+                if not user:
+                    msg = "Account not found."
+                else:
+                    # Update password with hashing
+                    user.set_password(new_pwd)
+                    db.session.commit()
+                    reset_tokens.pop(email, None)
+                    success = True
+                    msg = "Password updated. You can now log in."
     return render_template("reset.html", msg=msg, success=success, brand="Health Care")
 
 # --------------------------------- Main Pages -----------------------------------
@@ -188,30 +221,75 @@ def consult():
 @app.route("/yoga", methods=["GET", "POST"])
 def yoga():
     poses = []
+    pose_details = []
     disease = ""
     if request.method == "POST":
         disease = (request.form.get("disease") or "").strip()
         if disease:
             poses = suggest_yoga(disease)
-    return render_template("yoga.html", poses=poses, disease=disease, brand="Health Care")
+            # Get detailed information for each pose
+            for pose in poses:
+                # Extract just the pose name (before parenthesis)
+                pose_key = pose.split("(")[0].strip()
+                if pose_key in YOGA_POSES:
+                    pose_details.append({
+                        "key": pose_key,
+                        "data": YOGA_POSES[pose_key]
+                    })
+            # Increment yoga session counter
+            session["yoga_sessions"] = session.get("yoga_sessions", 0) + 1
+    return render_template("yoga.html", poses=poses, pose_details=pose_details, disease=disease, brand="Health Care")
+
+@app.route("/yoga/<pose_name>")
+def yoga_detail(pose_name):
+    """Detailed view for a specific yoga pose"""
+    if "user" not in session:
+        return redirect(url_for("login_register"))
+    
+    pose = YOGA_POSES.get(pose_name)
+    if not pose:
+        return redirect(url_for("yoga"))
+    
+    return render_template("yoga_detail.html", pose=pose, pose_name=pose_name, brand="Health Care")
 
 @app.route("/allopathic", methods=["GET", "POST"])
 def allopathic():
     suggestion = None
+    medicine_details = None
     disease = ""
     allopathy_map = {
-        "fever": "Paracetamol 500 mg — 1 tablet every 8 hours after food",
-        "cold": "Cetirizine 10 mg — once at night",
-        "headache": "Paracetamol 500 mg — as needed after food",
-        "back pain": "Ibuprofen 400 mg — twice daily + local heat",
-        "asthma": "Salbutamol inhaler — 2 puffs as needed",
-        "diabetes": "Metformin 500 mg — morning & night with food",
-        "stress": "Vitamin B-complex — once daily",
+        "fever": {"text": "Paracetamol 500 mg — 1 tablet every 8 hours after food", "medicine": "paracetamol"},
+        "cold": {"text": "Cetirizine 10 mg — once at night", "medicine": "cetirizine"},
+        "headache": {"text": "Paracetamol 500 mg — as needed after food", "medicine": "paracetamol"},
+        "back pain": {"text": "Ibuprofen 400 mg — twice daily + local heat", "medicine": "ibuprofen"},
+        "asthma": {"text": "Salbutamol inhaler — 2 puffs as needed", "medicine": None},
+        "diabetes": {"text": "Metformin 500 mg — morning & night with food", "medicine": "metformin"},
+        "stress": {"text": "Vitamin B-complex — once daily", "medicine": None},
     }
     if request.method == "POST":
         disease = (request.form.get("disease") or "").lower().strip()
-        suggestion = allopathy_map.get(disease, "No ready suggestion found. Please consult a doctor.")
-    return render_template("allopathic.html", disease=disease, suggestion=suggestion, brand="Health Care")
+        result = allopathy_map.get(disease)
+        if result:
+            suggestion = result["text"]
+            if result["medicine"] and result["medicine"] in MEDICINE_DATABASE:
+                medicine_details = MEDICINE_DATABASE[result["medicine"]]
+        else:
+            suggestion = "No ready suggestion found. Please consult a doctor."
+        # Increment allopathic counter
+        session["allopathic_count"] = session.get("allopathic_count", 0) + 1
+    return render_template("allopathic.html", disease=disease, suggestion=suggestion, medicine_details=medicine_details, brand="Health Care")
+
+@app.route("/medicine/<medicine_name>")
+def medicine_detail(medicine_name):
+    """Detailed view for a specific medicine"""
+    if "user" not in session:
+        return redirect(url_for("login_register"))
+    
+    medicine = MEDICINE_DATABASE.get(medicine_name)
+    if not medicine:
+        return redirect(url_for("allopathic"))
+    
+    return render_template("medicine_detail.html", medicine=medicine, medicine_name=medicine_name, brand="Health Care")
 
 @app.route("/ayurvedic", methods=["GET", "POST"])
 def ayurvedic():
@@ -229,6 +307,8 @@ def ayurvedic():
     if request.method == "POST":
         disease = (request.form.get("disease") or "").lower().strip()
         remedy = ayur_map.get(disease, "No standard remedy found. Consult an Ayurvedic doctor.")
+        # Increment ayurvedic counter
+        session["ayurvedic_count"] = session.get("ayurvedic_count", 0) + 1
     return render_template("ayurvedic.html", disease=disease, remedy=remedy, brand="Health Care")
 
 # ------------------------------ Wellness Dashboard ------------------------------
@@ -238,41 +318,157 @@ def dashboard():
     if "user" not in session:
         return redirect(url_for("login_register"))
 
-    # init demo 7-day history if missing
-    if "wellness_history" not in session:
-        session["wellness_history"] = [
-            {"label": f"D{i}", "score": random.randint(58, 82)} for i in range(1, 7)
-        ] + [{"label": "Today", "score": random.randint(60, 85)}]
+    # Initialize session counters if missing
+    if "yoga_sessions" not in session:
+        session["yoga_sessions"] = 0
+    if "allopathic_count" not in session:
+        session["allopathic_count"] = 0
+    if "ayurvedic_count" not in session:
+        session["ayurvedic_count"] = 0
 
-    result = None
-    today_inputs = {"mood": "ok", "sleep": 7, "stress": 4}
+    # Prepare stats
+    stats = {
+        "yoga_sessions": session.get("yoga_sessions", 0),
+        "allopathic_count": session.get("allopathic_count", 0),
+        "ayurvedic_count": session.get("ayurvedic_count", 0)
+    }
 
-    if request.method == "POST":
-        mood = (request.form.get("mood") or "ok").strip().lower()
-        sleep = request.form.get("sleep") or "7"
-        stress = request.form.get("stress") or "4"
+    # Calculate wellness score (average of recent history or default)
+    wellness_history = session.get("wellness_history", [])
+    if wellness_history:
+        wellness_score = sum(h["score"] for h in wellness_history) // len(wellness_history)
+    else:
+        wellness_score = 75
 
-        score, condition, yoga_list, ayur, allo = compute_insights(mood, sleep, stress)
-        result = {"score": score, "condition": condition, "yoga": yoga_list, "ayur": ayur, "allo": allo}
-        today_inputs = {"mood": mood, "sleep": int(sleep), "stress": int(stress)}
+    # Health tips rotation
+    health_tips = [
+        "Drink 8 glasses of water daily for optimal hydration.",
+        "Practice deep breathing for 5 minutes to reduce stress.",
+        "Get 7-8 hours of quality sleep each night.",
+        "Include leafy greens in your diet for better nutrition.",
+        "Take a 30-minute walk daily to boost your mood and energy."
+    ]
+    health_tip = health_tips[datetime.now().day % len(health_tips)]
 
-        # update history → keep last 7
-        hist = session.get("wellness_history", [])
-        hist.append({"label": "Today", "score": score})
-        session["wellness_history"] = hist[-7:]
-
-    chart_scores = [row["score"] for row in session.get("wellness_history", [])]
-    chart_labels = [row["label"] for row in session.get("wellness_history", [])]
-    if chart_labels:
-        chart_labels[-1] = "Today"
+    # Demo consultations
+    recent_consultations = [
+        {"doctor": "Dr. Sharma", "topic": "General Checkup", "date": "Nov 8"},
+        {"doctor": "Dr. Patel", "topic": "Stress Management", "date": "Nov 5"}
+    ]
 
     return render_template(
         "dashboard.html",
-        user=session["user"],
+        user_email=session["user"],
+        stats=stats,
+        wellness_score=wellness_score,
+        next_appointment="Nov 15",
+        health_tip=health_tip,
+        recent_consultations=recent_consultations,
+        year=datetime.now().year,
+        brand="Health Care"
+    )
+
+# ------------------------------ Symptom Checker ------------------------------
+
+@app.route("/symptom_checker", methods=["GET", "POST"])
+def symptom_checker():
+    if "user" not in session:
+        return redirect(url_for("login_register"))
+    
+    result = None
+    selected_symptoms = []
+    
+    # Symptom database with conditions
+    symptom_conditions = {
+        "fever": ["Common Cold", "Flu", "COVID-19", "Dengue", "Malaria"],
+        "cough": ["Common Cold", "Flu", "COVID-19", "Bronchitis", "Asthma"],
+        "headache": ["Migraine", "Tension Headache", "Sinusitis", "Flu", "Dehydration"],
+        "fatigue": ["Anemia", "Thyroid Issues", "Diabetes", "Depression", "Sleep Disorder"],
+        "body_ache": ["Flu", "Dengue", "Fibromyalgia", "Arthritis"],
+        "sore_throat": ["Common Cold", "Flu", "Strep Throat", "Tonsillitis"],
+        "runny_nose": ["Common Cold", "Allergies", "Sinusitis"],
+        "shortness_breath": ["Asthma", "COVID-19", "Anxiety", "Heart Issues"],
+        "nausea": ["Food Poisoning", "Gastritis", "Migraine", "Pregnancy"],
+        "dizziness": ["Low Blood Pressure", "Dehydration", "Anemia", "Inner Ear Issues"],
+        "chest_pain": ["Heart Issues", "Anxiety", "Acid Reflux", "Muscle Strain"],
+        "stomach_pain": ["Gastritis", "Food Poisoning", "IBS", "Appendicitis"],
+        "diarrhea": ["Food Poisoning", "IBS", "Gastroenteritis"],
+        "constipation": ["IBS", "Dehydration", "Poor Diet"],
+        "rash": ["Allergies", "Eczema", "Fungal Infection", "Viral Infection"],
+        "joint_pain": ["Arthritis", "Gout", "Injury", "Lupus"],
+        "back_pain": ["Muscle Strain", "Poor Posture", "Herniated Disc", "Kidney Issues"],
+        "insomnia": ["Stress", "Anxiety", "Depression", "Sleep Disorder"]
+    }
+    
+    if request.method == "POST":
+        selected_symptoms = request.form.getlist("symptoms")
+        
+        if selected_symptoms:
+            # Count condition occurrences
+            condition_scores = {}
+            for symptom in selected_symptoms:
+                conditions = symptom_conditions.get(symptom, [])
+                for condition in conditions:
+                    condition_scores[condition] = condition_scores.get(condition, 0) + 1
+            
+            # Sort by frequency
+            sorted_conditions = sorted(condition_scores.items(), key=lambda x: x[1], reverse=True)
+            top_conditions = sorted_conditions[:5]
+            
+            # Determine urgency
+            urgent_symptoms = {"chest_pain", "shortness_breath", "severe_headache"}
+            is_urgent = any(s in urgent_symptoms for s in selected_symptoms)
+            
+            # Get specialist recommendation
+            specialist_map = {
+                "Common Cold": "General Physician",
+                "Flu": "General Physician",
+                "COVID-19": "General Physician / Infectious Disease",
+                "Asthma": "Pulmonologist",
+                "Migraine": "Neurologist",
+                "Heart Issues": "Cardiologist",
+                "Diabetes": "Endocrinologist",
+                "Arthritis": "Rheumatologist",
+                "Gastritis": "Gastroenterologist",
+                "Depression": "Psychiatrist",
+                "Anxiety": "Psychiatrist / Psychologist",
+                "Allergies": "Allergist",
+                "Skin Issues": "Dermatologist"
+            }
+            
+            # Home care tips
+            home_care = []
+            if "fever" in selected_symptoms:
+                home_care.append("Rest and stay hydrated. Take paracetamol if needed.")
+            if "cough" in selected_symptoms:
+                home_care.append("Drink warm water with honey. Steam inhalation helps.")
+            if "headache" in selected_symptoms:
+                home_care.append("Rest in a dark room. Apply cold compress on forehead.")
+            if "fatigue" in selected_symptoms:
+                home_care.append("Get adequate sleep (7-8 hours). Eat nutritious meals.")
+            if "stomach_pain" in selected_symptoms:
+                home_care.append("Eat light, bland foods. Avoid spicy and oily food.")
+            
+            if not home_care:
+                home_care.append("Rest well and monitor your symptoms.")
+            
+            specialist = "General Physician"
+            if top_conditions:
+                specialist = specialist_map.get(top_conditions[0][0], "General Physician")
+            
+            result = {
+                "possible_conditions": [c[0] for c in top_conditions],
+                "match_count": [c[1] for c in top_conditions],
+                "is_urgent": is_urgent,
+                "specialist": specialist,
+                "home_care": home_care,
+                "symptom_count": len(selected_symptoms)
+            }
+    
+    return render_template(
+        "symptom_checker.html",
         result=result,
-        today_inputs=today_inputs,
-        chart_labels=chart_labels,
-        chart_scores=chart_scores,
+        selected_symptoms=selected_symptoms,
         brand="Health Care"
     )
 

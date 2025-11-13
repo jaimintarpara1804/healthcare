@@ -1,0 +1,529 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{{ brand }} — Symptom Checker</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    .symptom-container { max-width: 1000px; margin: 0 auto; padding: 0 var(--space-lg); }
+    
+    .symptom-card {
+      background: white;
+      border-radius: var(--radius-xl);
+      padding: var(--space-2xl);
+      box-shadow: var(--shadow-lg);
+      margin-bottom: var(--space-xl);
+      border: 1px solid var(--gray-100);
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    
+    .header h1 {
+      font-size: 2rem;
+      margin: 0 0 8px;
+      color: #0b78b7;
+    }
+    
+    .header .icon {
+      font-size: 3rem;
+      margin-bottom: 12px;
+    }
+    
+    .disclaimer {
+      background: #fff3cd;
+      border-left: 4px solid #ffc107;
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 24px;
+      font-size: 0.9rem;
+    }
+    
+    .disclaimer strong {
+      color: #856404;
+    }
+    
+    .symptom-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+      margin: 24px 0;
+    }
+    
+    .symptom-item {
+      position: relative;
+    }
+    
+    .symptom-item input[type="checkbox"] {
+      position: absolute;
+      opacity: 0;
+      cursor: pointer;
+    }
+    
+    .symptom-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 16px;
+      border: 2px solid #e5eef6;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: #fff;
+    }
+    
+    .symptom-item input[type="checkbox"]:checked + .symptom-label {
+      background: #e8f7fb;
+      border-color: #0aa0a9;
+      font-weight: 600;
+    }
+    
+    .symptom-label:hover {
+      border-color: #0aa0a9;
+      transform: translateY(-2px);
+    }
+    
+    .symptom-icon {
+      font-size: 1.3rem;
+    }
+    
+    .btn {
+      display: inline-block;
+      padding: 14px 32px;
+      background: linear-gradient(135deg, #0b78b7, #0aa0a9);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(11,120,183,.3);
+      transition: all 0.2s;
+    }
+    
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px rgba(11,120,183,.4);
+    }
+    
+    .btn-secondary {
+      background: #6c757d;
+      box-shadow: 0 8px 20px rgba(108,117,125,.3);
+      margin-left: 12px;
+    }
+    
+    .result-section {
+      margin-top: 32px;
+    }
+    
+    .urgent-banner {
+      background: linear-gradient(135deg, #dc3545, #c82333);
+      color: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 24px;
+      text-align: center;
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.9; }
+    }
+    
+    .urgent-banner h3 {
+      margin: 0 0 8px;
+      font-size: 1.4rem;
+    }
+    
+    .condition-list {
+      list-style: none;
+      padding: 0;
+      margin: 20px 0;
+    }
+    
+    .condition-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      background: #f8f9fa;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      border-left: 4px solid #0aa0a9;
+    }
+    
+    .condition-name {
+      font-weight: 600;
+      color: #2c3e50;
+    }
+    
+    .match-badge {
+      background: #0aa0a9;
+      color: #fff;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+    
+    .info-box {
+      background: #e8f7fb;
+      border-left: 4px solid #0aa0a9;
+      padding: 16px;
+      border-radius: 8px;
+      margin: 16px 0;
+    }
+    
+    .info-box h4 {
+      margin: 0 0 8px;
+      color: #0b78b7;
+    }
+    
+    .care-tips {
+      list-style: none;
+      padding: 0;
+    }
+    
+    .care-tips li {
+      padding: 8px 0;
+      padding-left: 24px;
+      position: relative;
+    }
+    
+    .care-tips li:before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: #0aa0a9;
+      font-weight: bold;
+    }
+    
+    .specialist-box {
+      background: linear-gradient(135deg, #0b78b7, #0aa0a9);
+      color: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+      margin: 20px 0;
+    }
+    
+    .specialist-box h4 {
+      margin: 0 0 8px;
+      font-size: 1.1rem;
+    }
+    
+    .specialist-box .specialist-name {
+      font-size: 1.4rem;
+      font-weight: 700;
+    }
+    
+    .nav-links {
+      text-align: center;
+      margin-top: 32px;
+    }
+    
+    .nav-links a {
+      color: #0b78b7;
+      text-decoration: none;
+      margin: 0 12px;
+      font-weight: 600;
+    }
+    
+    .nav-links a:hover {
+      text-decoration: underline;
+    }
+    
+    @media (max-width: 768px) {
+      .symptom-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .btn-secondary {
+        margin-left: 0;
+        margin-top: 12px;
+        display: block;
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="navbar-container">
+      <a href="/home" class="navbar-brand">
+        <span class="logo">🩺</span>
+        <span>Health Care</span>
+      </a>
+      <ul class="navbar-menu">
+        <li><a href="/home">Home</a></li>
+        <li><a href="/dashboard">Dashboard</a></li>
+        <li><a href="/symptom_checker" class="active">Symptom Checker</a></li>
+        <li><a href="/consult">Consult</a></li>
+        <li><a href="/feedback">Feedback</a></li>
+        <li><a href="/logout" class="btn btn-primary btn-sm">Logout</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="page-wrapper">
+    <div class="symptom-container">
+      <div class="symptom-card animate-fade-in">
+      <div class="header">
+        <div class="icon">🩺</div>
+        <h1>Symptom Checker</h1>
+        <p style="color: #667085;">Select your symptoms to get possible conditions and recommendations</p>
+      </div>
+      
+      <div class="disclaimer">
+        <strong>⚠️ Medical Disclaimer:</strong> This tool provides general information only and is not a substitute for professional medical advice. Always consult a qualified healthcare provider for accurate diagnosis and treatment.
+      </div>
+      
+      <form method="POST">
+        <h3>Select Your Symptoms:</h3>
+        
+        <div class="symptom-grid">
+          <div class="symptom-item">
+            <input type="checkbox" id="fever" name="symptoms" value="fever" 
+              {% if 'fever' in selected_symptoms %}checked{% endif %}>
+            <label for="fever" class="symptom-label">
+              <span class="symptom-icon">🌡️</span>
+              <span>Fever</span>
+            </label>
+          </div>
+          
+          <div class="symptom-item">
+            <input type="checkbox" id="cough" name="symptoms" value="cough"
+              {% if 'cough' in selected_symptoms %}checked{% endif %}>
+            <label for="cough" class="symptom-label">
+              <span class="symptom-icon">😷</span>
+              <span>Cough</span>
+            </label>
+          </div>
+          
+          <div class="symptom-item">
+            <input type="checkbox" id="headache" name="symptoms" value="headache"
+              {% if 'headache' in selected_symptoms %}checked{% endif %}>
+            <label for="headache" class="symptom-label">
+              <span class="symptom-icon">🤕</span>
+              <span>Headache</span>
+            </label>
+          </div>
+          
+          <div class="symptom-item">
+            <input type="checkbox" id="fatigue" name="symptoms" value="fatigue"
+              {% if 'fatigue' in selected_symptoms %}checked{% endif %}>
+            <label for="fatigue" class="symptom-label">
+              <span class="symptom-icon">😴</span>
+              <span>Fatigue</span>
+            </label>
+          </div>
+          
+          <div class="symptom-item">
+            <input type="checkbox" id="body_ache" name="symptoms" value="body_ache"
+              {% if 'body_ache' in selected_symptoms %}checked{% endif %}>
+            <label for="body_ache" class="symptom-label">
+              <span class="symptom-icon">💪</span>
+              <span>Body Ache</span>
+            </label>
+          </div>
+          
+          <div class="symptom-item">
+            <input type="checkbox" id="sore_throat" name="symptoms" value="sore_throat"
+              {% if 'sore_throat' in selected_symptoms %}checked{% endif %}>
+            <label for="sore_throat" class="symptom-label">
+              <span class="symptom-icon">🗣️</span>
+              <span>Sore Throat</span>
+            </label>
+          </div>
+          
+          <div class="symptom-item">
+            <input type="checkbox" id="runny_nose" name="symptoms" value="runny_nose"
+              {% if 'runny_nose' in selected_symptoms %}checked{% endif %}>
+            <label for="runny_nose" class="symptom-label">
+              <span class="symptom-icon">🤧</span>
+              <span>Runny Nose</span>
+            </label>
+          </div>
+          
+          <div class="symptom-item">
+            <input type="checkbox" id="shortness_breath" name="symptoms" value="shortness_breath"
+              {% if 'shortness_breath' in selected_symptoms %}checked{% endif %}>
+            <label for="shortness_breath" class="symptom-label">
+              <span class="symptom-icon">😮‍💨</span>
+              <span>Shortness of Breath</span>
+            </label>
+          </div>
+          
+          <div class="symptom-item">
+            <input type="checkbox" id="nausea" name="symptoms" value="nausea"
+              {% if 'nausea' in selected_symptoms %}checked{% endif %}>
+            <label for="nausea" class="symptom-label">
+              <span class="symptom-icon">🤢</span>
+              <span>Nausea</span>
+            </label>
+          </div>
+          
+          <div class="symptom-item">
+            <input type="checkbox" id="dizziness" name="symptoms" value="dizziness"
+              {% if 'dizziness' in selected_symptoms %}checked{% endif %}>
+            <label for="dizziness" class="symptom-label">
+              <span class="symptom-icon">😵</span>
+              <span>Dizziness</span>
+            </label>
+          </div>
+          
+          <div class="symptom-item">
+            <input type="checkbox" id="chest_pain" name="symptoms" value="chest_pain"
+              {% if 'chest_pain' in selected_symptoms %}checked{% endif %}>
+            <label for="chest_pain" class="symptom-label">
+              <span class="symptom-icon">❤️</span>
+              <span>Chest Pain</span>
+            </label>
+          </div>
+          
+          <div class="symptom-item">
+            <input type="checkbox" id="stomach_pain" name="symptoms" value="stomach_pain"
+              {% if 'stomach_pain' in selected_symptoms %}checked{% endif %}>
+            <label for="stomach_pain" class="symptom-label">
+              <span class="symptom-icon">🤰</span>
+              <span>Stomach Pain</span>
+            </label>
+          </div>
+          
+          <div class="symptom-item">
+            <input type="checkbox" id="diarrhea" name="symptoms" value="diarrhea"
+              {% if 'diarrhea' in selected_symptoms %}checked{% endif %}>
+            <label for="diarrhea" class="symptom-label">
+              <span class="symptom-icon">🚽</span>
+              <span>Diarrhea</span>
+            </label>
+          </div>
+          
+          <div class="symptom-item">
+            <input type="checkbox" id="constipation" name="symptoms" value="constipation"
+              {% if 'constipation' in selected_symptoms %}checked{% endif %}>
+            <label for="constipation" class="symptom-label">
+              <span class="symptom-icon">😣</span>
+              <span>Constipation</span>
+            </label>
+          </div>
+          
+          <div class="symptom-item">
+            <input type="checkbox" id="rash" name="symptoms" value="rash"
+              {% if 'rash' in selected_symptoms %}checked{% endif %}>
+            <label for="rash" class="symptom-label">
+              <span class="symptom-icon">🔴</span>
+              <span>Rash</span>
+            </label>
+          </div>
+          
+          <div class="symptom-item">
+            <input type="checkbox" id="joint_pain" name="symptoms" value="joint_pain"
+              {% if 'joint_pain' in selected_symptoms %}checked{% endif %}>
+            <label for="joint_pain" class="symptom-label">
+              <span class="symptom-icon">🦴</span>
+              <span>Joint Pain</span>
+            </label>
+          </div>
+          
+          <div class="symptom-item">
+            <input type="checkbox" id="back_pain" name="symptoms" value="back_pain"
+              {% if 'back_pain' in selected_symptoms %}checked{% endif %}>
+            <label for="back_pain" class="symptom-label">
+              <span class="symptom-icon">🧍</span>
+              <span>Back Pain</span>
+            </label>
+          </div>
+          
+          <div class="symptom-item">
+            <input type="checkbox" id="insomnia" name="symptoms" value="insomnia"
+              {% if 'insomnia' in selected_symptoms %}checked{% endif %}>
+            <label for="insomnia" class="symptom-label">
+              <span class="symptom-icon">🌙</span>
+              <span>Insomnia</span>
+            </label>
+          </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 28px;">
+          <button type="submit" class="btn">Check Symptoms</button>
+          <button type="reset" class="btn btn-secondary" onclick="window.location.reload()">Clear All</button>
+        </div>
+      </form>
+      
+      {% if result %}
+      <div class="result-section">
+        <hr style="margin: 32px 0; border: none; border-top: 2px solid #e5eef6;">
+        
+        {% if result.is_urgent %}
+        <div class="urgent-banner">
+          <h3>⚠️ URGENT: Seek Immediate Medical Attention</h3>
+          <p>Your symptoms may require immediate care. Please visit the nearest emergency room or call emergency services.</p>
+        </div>
+        {% endif %}
+        
+        <h2 style="color: #0b78b7; margin-bottom: 20px;">Analysis Results</h2>
+        <p style="color: #667085; margin-bottom: 24px;">Based on {{ result.symptom_count }} symptom(s) you selected:</p>
+        
+        <h3>Possible Conditions:</h3>
+        <ul class="condition-list">
+          {% for condition in result.possible_conditions %}
+          <li class="condition-item">
+            <span class="condition-name">{{ condition }}</span>
+            <span class="match-badge">{{ result.match_count[loop.index0] }} match{{ 'es' if result.match_count[loop.index0] > 1 else '' }}</span>
+          </li>
+          {% endfor %}
+        </ul>
+        
+        <div class="specialist-box">
+          <h4>Recommended Specialist:</h4>
+          <div class="specialist-name">{{ result.specialist }}</div>
+        </div>
+        
+        <div class="info-box">
+          <h4>🏠 Home Care Tips:</h4>
+          <ul class="care-tips">
+            {% for tip in result.home_care %}
+            <li>{{ tip }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+        
+        <div class="info-box" style="background: #fff3cd; border-left-color: #ffc107;">
+          <h4 style="color: #856404;">📋 Next Steps:</h4>
+          <ul class="care-tips">
+            <li>Book an appointment with a {{ result.specialist }}</li>
+            <li>Keep track of your symptoms and their duration</li>
+            <li>Note any triggers or patterns you observe</li>
+            <li>Prepare a list of questions for your doctor</li>
+          </ul>
+        </div>
+        
+        <div style="text-align: center; margin-top: 28px;">
+          <a href="/consult" class="btn">Book Consultation</a>
+        </div>
+      </div>
+      {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <p class="footer-text">© 2024 Health Care • Your Trusted Wellness Partner</p>
+      <div class="footer-links">
+        <a href="/home">Home</a>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/consult">Consultations</a>
+        <a href="/feedback">Feedback</a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

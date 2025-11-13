@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Health Care • Reset Password</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-lg);
+    }
+    
+    .reset-container {
+      width: 100%;
+      max-width: 480px;
+    }
+    
+    .reset-card {
+      background: white;
+      border-radius: var(--radius-xl);
+      padding: var(--space-2xl);
+      box-shadow: var(--shadow-2xl);
+      animation: fadeIn 0.5s ease-out;
+    }
+    
+    .header-section {
+      text-align: center;
+      margin-bottom: var(--space-xl);
+    }
+    
+    .icon-circle {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto var(--space-md);
+      background: linear-gradient(135deg, var(--primary-500), var(--accent-500));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      box-shadow: var(--shadow-lg);
+    }
+    
+    .page-title {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--gray-900);
+      margin-bottom: var(--space-xs);
+    }
+    
+    .page-subtitle {
+      color: var(--gray-600);
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+    
+    .alert-message {
+      padding: var(--space-md);
+      border-radius: var(--radius-md);
+      margin-bottom: var(--space-lg);
+      font-weight: 600;
+      text-align: center;
+    }
+    
+    .alert-success {
+      background: var(--accent-50);
+      color: var(--accent-700);
+      border: 1px solid var(--accent-200);
+    }
+    
+    .alert-error {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+    }
+    
+    .form-group {
+      margin-bottom: var(--space-lg);
+    }
+    
+    .password-wrapper {
+      position: relative;
+    }
+    
+    .password-toggle {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: var(--gray-500);
+      font-size: 0.875rem;
+      font-weight: 600;
+      user-select: none;
+      transition: color 0.2s;
+    }
+    
+    .password-toggle:hover {
+      color: var(--primary-600);
+    }
+    
+    .info-box {
+      background: var(--primary-50);
+      border: 1px solid var(--primary-200);
+      border-radius: var(--radius-md);
+      padding: var(--space-md);
+      margin-bottom: var(--space-lg);
+    }
+    
+    .info-box p {
+      color: var(--primary-700);
+      font-size: 0.875rem;
+      margin: 0;
+      line-height: 1.5;
+    }
+    
+    .back-link {
+      text-align: center;
+      margin-top: var(--space-lg);
+    }
+    
+    .back-link a {
+      color: var(--primary-600);
+      font-weight: 600;
+      font-size: 0.95rem;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    
+    .back-link a:hover {
+      color: var(--primary-700);
+    }
+    
+    .success-actions {
+      display: flex;
+      gap: var(--space-md);
+      margin-top: var(--space-lg);
+    }
+    
+    .success-actions .btn {
+      flex: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="reset-container">
+    <div class="reset-card">
+      <!-- Header Section -->
+      <div class="header-section">
+        <div class="icon-circle">🔐</div>
+        <h1 class="page-title">Reset Password</h1>
+        <p class="page-subtitle">Enter the reset code from your email and create a new password</p>
+      </div>
+
+      <!-- Alert Messages -->
+      {% if msg %}
+        <div class="alert-message {{ 'alert-success' if success else 'alert-error' }}">
+          {{ msg }}
+        </div>
+      {% endif %}
+
+      {% if success %}
+        <!-- Success State -->
+        <div class="success-actions">
+          <a href="/login_register" class="btn btn-primary">Go to Login</a>
+        </div>
+      {% else %}
+        <!-- Reset Form -->
+        <div class="info-box">
+          <p>💡 <strong>Tip:</strong> If you don't have a reset code, go to <a href="/forgot" style="color: var(--primary-700); text-decoration: underline;">Forgot Password</a> to generate one.</p>
+        </div>
+
+        <form method="POST">
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <input 
+              type="email" 
+              name="email" 
+              class="form-input" 
+              placeholder="your@email.com"
+              required
+            >
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Reset Code</label>
+            <input 
+              type="text" 
+              name="code" 
+              class="form-input" 
+              placeholder="Enter 6-digit code"
+              maxlength="6"
+              pattern="[0-9]{6}"
+              required
+            >
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">New Password</label>
+            <div class="password-wrapper">
+              <input 
+                id="newPassword" 
+                type="password" 
+                name="new_password" 
+                class="form-input" 
+                placeholder="Enter new password"
+                minlength="6"
+                required
+              >
+              <span id="toggleNew" class="password-toggle">Show</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Confirm Password</label>
+            <div class="password-wrapper">
+              <input 
+                id="confirmPassword" 
+                type="password" 
+                name="confirm_password" 
+                class="form-input" 
+                placeholder="Confirm new password"
+                minlength="6"
+                required
+              >
+              <span id="toggleConfirm" class="password-toggle">Show</span>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%;">
+            Reset Password
+          </button>
+        </form>
+
+        <div class="back-link">
+          <a href="/login_register">← Back to Login</a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <script>
+    // Password toggle functionality
+    function setupPasswordToggle(inputId, toggleId) {
+      const input = document.getElementById(inputId);
+      const toggle = document.getElementById(toggleId);
+      
+      if (toggle && input) {
+        toggle.addEventListener('click', function() {
+          const type = input.type === 'password' ? 'text' : 'password';
+          input.type = type;
+          toggle.textContent = type === 'password' ? 'Show' : 'Hide';
+        });
+      }
+    }
+    
+    setupPasswordToggle('newPassword', 'toggleNew');
+    setupPasswordToggle('confirmPassword', 'toggleConfirm');
+    
+    // Password match validation
+    const newPassword = document.getElementById('newPassword');
+    const confirmPassword = document.getElementById('confirmPassword');
+    
+    if (newPassword && confirmPassword) {
+      confirmPassword.addEventListener('input', function() {
+        if (newPassword.value !== confirmPassword.value) {
+          confirmPassword.setCustomValidity('Passwords do not match');
+        } else {
+          confirmPassword.setCustomValidity('');
+        }
+      });
+      
+      newPassword.addEventListener('input', function() {
+        if (confirmPassword.value && newPassword.value !== confirmPassword.value) {
+          confirmPassword.setCustomValidity('Passwords do not match');
+        } else {
+          confirmPassword.setCustomValidity('');
+        }
+      });
+    }
+  </script>
+</body>
+</html>

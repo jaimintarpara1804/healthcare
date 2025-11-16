@@ -5,15 +5,43 @@
   <title>Health Care • Consult a Doctor</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <style>
-    .wrap{max-width:860px;margin:24px auto}
+    .wrap{max-width:860px;margin:24px auto;padding:0 20px}
     .nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
     .nav a{color:#444;text-decoration:none;font-weight:600}
     .box{background:#fff;border-radius:18px;padding:22px;box-shadow:0 8px 20px rgba(0,0,0,.08)}
-    label{display:block;margin:8px 0 6px;color:#444}
-    input,select,textarea{width:100%}
-    .btn{background:#1e88e5;color:#fff;border:none;padding:10px 16px;border-radius:10px;cursor:pointer}
-    .btn:hover{background:#1565c0}
-    .summary{background:#eef6ff;border:1px solid #cfe3ff;border-radius:12px;padding:14px;margin-top:12px}
+    
+    /* Tally Form Embed Styles */
+    .tally-container {
+      width: 100%;
+      min-height: 600px;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    
+    iframe {
+      border: none;
+      width: 100%;
+      min-height: 600px;
+    }
+    
+    .info-box {
+      background: #e3f2fd;
+      border-left: 4px solid #1e88e5;
+      padding: 16px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+    }
+    
+    .info-box h3 {
+      margin: 0 0 8px 0;
+      color: #1565c0;
+    }
+    
+    .info-box p {
+      margin: 0;
+      color: #555;
+      line-height: 1.6;
+    }
   </style>
 </head>
 <body>
@@ -23,36 +51,20 @@
       <div><a href="/home">Home</a> · <a href="/logout">Logout</a></div>
     </div>
 
+    <div class="info-box">
+      <h3>📋 Book Your Appointment</h3>
+      <p>Fill out the form below to schedule a consultation with our healthcare professionals. We'll get back to you within 24 hours.</p>
+    </div>
+
     <div class="box">
-      {% if confirmation %}
-        <h3>✅ Request Submitted</h3>
-        <div class="summary">
-          <p><b>Name:</b> {{ confirmation.name }}</p>
-          <p><b>Disease:</b> {{ confirmation.disease }}</p>
-          <p><b>Doctor Type:</b> {{ confirmation.doctor_type }}</p>
-          <p><b>Description:</b> {{ confirmation.description }}</p>
-        </div>
-        <p style="margin-top:14px"><a href="/home">← Back to Home</a></p>
-      {% else %}
-        <form method="POST">
-          <label>Your Name</label>
-          <input type="text" name="name" placeholder="Enter your name" required>
+      <div class="tally-container">
+        <!-- Tally Form Embed -->
+        <iframe src="https://tally.so/embed/zxxYjk?alignLeft=1&hideTitle=1&transparentBackground=1&dynamicHeight=1" width="100%" height="600px" frameborder="0" marginheight="0" marginwidth="0"></iframe>
+      </div>
+    </div>
 
-          <label>Disease / Problem</label>
-          <input type="text" name="disease" placeholder="e.g., back pain, diabetes" required>
-
-          <label>Doctor Type</label>
-          <select name="doctor_type" required>
-            <option value="Allopathic">Allopathic</option>
-            <option value="Ayurvedic">Ayurvedic</option>
-          </select>
-
-          <label>Description / Symptoms</label>
-          <textarea name="description" rows="4" placeholder="Write your symptoms (optional)"></textarea>
-
-          <button class="btn" type="submit" style="margin-top:12px">Submit Request</button>
-        </form>
-      {% endif %}
+    <div style="text-align: center; margin-top: 20px; color: #666;">
+      <p>Having trouble with the form? <a href="https://tally.so/r/WOOzOR" target="_blank" style="color: #1e88e5;">Open in new tab</a></p>
     </div>
   </div>
 </body>

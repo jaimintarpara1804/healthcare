@@ -199,24 +199,11 @@ def home():
         return redirect(url_for("login_register"))
     return render_template("home.html", user=session["user"], brand="Health Care")
 
-@app.route("/consult", methods=["GET", "POST"])
+@app.route("/consult")
 def consult():
     if "user" not in session:
         return redirect(url_for("login_register"))
-
-    confirmation = None
-    if request.method == "POST":
-        name = (request.form.get("name") or "").strip()
-        disease = (request.form.get("disease") or "").strip()
-        doctor_type = (request.form.get("doctor_type") or "").strip()
-        description = (request.form.get("description") or "").strip()
-        confirmation = {
-            "name": name or "Not provided",
-            "disease": disease or "Not provided",
-            "doctor_type": doctor_type or "Not provided",
-            "description": description or "—"
-        }
-    return render_template("consult.html", confirmation=confirmation, brand="Health Care")
+    return render_template("consult.html", brand="Health Care")
 
 @app.route("/yoga", methods=["GET", "POST"])
 def yoga():

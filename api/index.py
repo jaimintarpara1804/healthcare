@@ -1,14 +1,32 @@
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify, flash
-from flask_cors import CORS
-import sys
 import os
+import sys
 
-# Add the parent directory to the path so we can import from the root
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Add current directory to Python path
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+sys.path.insert(0, parent_dir)
 
-# Import the main app
-from app import app
+# Import Flask and create a simple app for testing
+from flask import Flask
 
-# This is the entry point for Vercel
+# Try to import the main app, fallback to simple app if it fails
+try:
+    from app import app
+except ImportError as e:
+    print(f"Failed to import main app: {e}")
+    # Create a minimal Flask app for debugging
+    app = Flask(__name__)
+    
+    @app.route('/')
+    def hello():
+        return f"Hello from Vercel! Import error: {str(e)}"
+    
+    @app.route('/health')
+    def health():
+        return {"status": "ok", "message": "Simple Flask app running"}
+
+# Make sure the app is available for Vercel
+application = app
+
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)

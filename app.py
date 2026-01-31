@@ -17,14 +17,17 @@ CORS(app, resources={r"/api/*": {"origins": "*"}})
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Ensure instance folder exists
-instance_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'instance')
-os.makedirs(instance_path, exist_ok=True)
+# Ensure instance folder exists (only for local development)
+if not os.environ.get('VERCEL'):
+    instance_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'instance')
+    os.makedirs(instance_path, exist_ok=True)
+else:
+    instance_path = '/tmp'
 
 # Use absolute path for database - modified for Vercel deployment
 if os.environ.get('VERCEL'):
     # For Vercel deployment, use a temporary database (consider using external DB for production)
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tmp/users.db'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/users.db'
 else:
     # Local development
     db_path = os.path.join(instance_path, 'users.db')
@@ -33,9 +36,13 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
 
-# Create tables
-with app.app_context():
-    db.create_all()
+# Create tables (with error handling for serverless)
+try:
+    with app.app_context():
+        db.create_all()
+except Exception as e:
+    print(f"Database initialization error: {e}")
+    # In serverless, we'll create tables on first request if needed
 
 # ---------------- Reset tokens (in-memory for demo) ----------------
 reset_tokens = {}    # {email: {"code": "123456", "expires": <epoch>}}

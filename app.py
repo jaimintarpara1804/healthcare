@@ -1,12 +1,21 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify, flash
+from flask_cors import CORS
 from yoga_suggestions import suggest_yoga
 from yoga_data import YOGA_POSES, MEDICINE_DATABASE
-from models import db, User
-import os, random, time
-from datetime import datetime
+from models import db, User, Appointment
+import os, random, time, logging, json
+from datetime import datetime, date, timedelta
+from functools import wraps
 
 app = Flask(__name__)
-app.secret_key = "healthcare_secret"
+app.secret_key = "healthcare_secret_2024_secure"
+
+# Enable CORS for API endpoints
+CORS(app, resources={r"/api/*": {"origins": "*"}})
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Ensure instance folder exists
 instance_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'instance')
@@ -25,6 +34,22 @@ with app.app_context():
 
 # ---------------- Reset tokens (in-memory for demo) ----------------
 reset_tokens = {}    # {email: {"code": "123456", "expires": <epoch>}}
+
+# --------------------------------- Authentication Helpers --------------------------------------
+
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user' not in session:
+            return redirect(url_for('login_register'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+def get_current_user():
+    """Get current logged-in user"""
+    if 'user' in session:
+        return User.query.filter_by(email=session['user']).first()
+    return None
 
 # --------------------------------- Helpers --------------------------------------
 
@@ -194,18 +219,26 @@ def reset():
 # --------------------------------- Main Pages -----------------------------------
 
 @app.route("/home")
+@login_required
 def home():
-    if "user" not in session:
-        return redirect(url_for("login_register"))
     return render_template("home.html", user=session["user"], brand="Health Care")
 
+@app.route("/appointments")
+@login_required
+def appointments():
+    """View all appointments for logged-in user"""
+    user_email = session["user"]
+    user_appointments = Appointment.query.filter_by(patient_email=user_email).order_by(Appointment.appointment_date.desc()).all()
+    
+    return render_template("appointments.html", appointments=user_appointments, brand="Health Care")
+
 @app.route("/consult")
+@login_required
 def consult():
-    if "user" not in session:
-        return redirect(url_for("login_register"))
     return render_template("consult.html", brand="Health Care")
 
 @app.route("/yoga", methods=["GET", "POST"])
+@login_required
 def yoga():
     poses = []
     pose_details = []
@@ -228,11 +261,9 @@ def yoga():
     return render_template("yoga.html", poses=poses, pose_details=pose_details, disease=disease, brand="Health Care")
 
 @app.route("/yoga/<pose_name>")
+@login_required
 def yoga_detail(pose_name):
     """Detailed view for a specific yoga pose"""
-    if "user" not in session:
-        return redirect(url_for("login_register"))
-    
     pose = YOGA_POSES.get(pose_name)
     if not pose:
         return redirect(url_for("yoga"))
@@ -240,6 +271,7 @@ def yoga_detail(pose_name):
     return render_template("yoga_detail.html", pose=pose, pose_name=pose_name, brand="Health Care")
 
 @app.route("/allopathic", methods=["GET", "POST"])
+@login_required
 def allopathic():
     suggestion = None
     medicine_details = None
@@ -267,11 +299,9 @@ def allopathic():
     return render_template("allopathic.html", disease=disease, suggestion=suggestion, medicine_details=medicine_details, brand="Health Care")
 
 @app.route("/medicine/<medicine_name>")
+@login_required
 def medicine_detail(medicine_name):
     """Detailed view for a specific medicine"""
-    if "user" not in session:
-        return redirect(url_for("login_register"))
-    
     medicine = MEDICINE_DATABASE.get(medicine_name)
     if not medicine:
         return redirect(url_for("allopathic"))
@@ -279,6 +309,7 @@ def medicine_detail(medicine_name):
     return render_template("medicine_detail.html", medicine=medicine, medicine_name=medicine_name, brand="Health Care")
 
 @app.route("/ayurvedic", methods=["GET", "POST"])
+@login_required
 def ayurvedic():
     remedy = None
     disease = ""
@@ -301,10 +332,8 @@ def ayurvedic():
 # ------------------------------ Wellness Dashboard ------------------------------
 
 @app.route("/dashboard", methods=["GET", "POST"])
+@login_required
 def dashboard():
-    if "user" not in session:
-        return redirect(url_for("login_register"))
-
     # Initialize session counters if missing
     if "yoga_sessions" not in session:
         session["yoga_sessions"] = 0
@@ -358,10 +387,8 @@ def dashboard():
 # ------------------------------ Symptom Checker ------------------------------
 
 @app.route("/symptom_checker", methods=["GET", "POST"])
+@login_required
 def symptom_checker():
-    if "user" not in session:
-        return redirect(url_for("login_register"))
-    
     result = None
     selected_symptoms = []
     
@@ -460,24 +487,10 @@ def symptom_checker():
     )
 
 # ------------------------------ BMI / Fitness Lab ------------------------------
-# -------------------- FEEDBACK (simple stub) --------------------
-@app.route("/feedback", methods=["GET", "POST"])
-def feedback():
-    msg = None
-    if request.method == "POST":
-        name = request.form.get("name", "")
-        email = request.form.get("email", "")
-        message = request.form.get("message", "")
-        # (You can save to DB later if you want)
-        msg = "Thanks for your feedback!"
-    return render_template("feedback.html", msg=msg)
-
 
 @app.route("/bmi", methods=["GET", "POST"])
+@login_required
 def bmi():
-    if "user" not in session:
-        return redirect(url_for("login_register"))
-
     result, error = None, ""
 
     defaults = {
@@ -556,7 +569,7 @@ def bmi():
 
             yoga_suggestions = {
                 "Underweight": ["Surya Namaskar", "Bridge Pose", "Bhujangasana"],
-                "Normal": ["Vajrasana", "Cat-Cow Pose", "Shavasana"],
+                "Normal": ["Vajrasana", "Cat-Cow Pose", "Warrior Pose"],
                 "Overweight": ["Tadasana", "Balasana", "Anulom Vilom"],
                 "Obesity": ["Utkatasana (gentle)", "Viparita Karani", "Nadi Shodhana"]
             }
@@ -581,8 +594,185 @@ def bmi():
 
     return render_template("bmi.html", result=result, error=error, defaults=defaults, brand="Health Care")
 
+# -------------------- FEEDBACK (simple stub) --------------------
+@app.route("/feedback", methods=["GET", "POST"])
+@login_required
+def feedback():
+    msg = None
+    if request.method == "POST":
+        name = request.form.get("name", "")
+        email = request.form.get("email", "")
+        message = request.form.get("message", "")
+        # (You can save to DB later if you want)
+        msg = "Thanks for your feedback!"
+    return render_template("feedback.html", msg=msg, brand="Health Care")
+
+# ------------------------------------ API Endpoints ------------------------------------
+
+@app.route('/api/save_appointment', methods=['POST'])
+def save_appointment():
+    """
+    Receives appointment data from Make.com automation
+    and saves it to the database.
+    """
+    try:
+        logger.info("Received appointment save request")
+        
+        # Get JSON data
+        if not request.is_json:
+            logger.error("Request is not JSON")
+            return jsonify({
+                "status": "error",
+                "message": "Content-Type must be application/json"
+            }), 400
+            
+        data = request.get_json()
+        logger.info(f"Received data: {data}")
+        
+        # Validate required fields
+        required_fields = ['name', 'email', 'phone', 'doctor_type', 'issue', 'appointment_date', 'appointment_time']
+        missing_fields = []
+        
+        for field in required_fields:
+            if field not in data or not str(data[field]).strip():
+                missing_fields.append(field)
+        
+        if missing_fields:
+            logger.error(f"Missing fields: {missing_fields}")
+            return jsonify({
+                "status": "error",
+                "message": f"Missing required fields: {', '.join(missing_fields)}",
+                "missing_fields": missing_fields
+            }), 400
+
+        # Validate email format
+        import re
+        email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        if not re.match(email_pattern, data['email']):
+            logger.error(f"Invalid email format: {data['email']}")
+            return jsonify({
+                "status": "error",
+                "message": "Invalid email format"
+            }), 400
+
+        # Parse and validate date
+        try:
+            # Try multiple date formats
+            date_formats = ['%Y-%m-%d', '%m/%d/%Y', '%d/%m/%Y', '%Y/%m/%d']
+            appointment_date = None
+            
+            for fmt in date_formats:
+                try:
+                    appointment_date = datetime.strptime(data['appointment_date'], fmt).date()
+                    break
+                except ValueError:
+                    continue
+            
+            if not appointment_date:
+                raise ValueError("No valid date format found")
+                
+        except ValueError as e:
+            logger.error(f"Invalid date format: {data['appointment_date']}")
+            return jsonify({
+                "status": "error",
+                "message": "Invalid date format. Use YYYY-MM-DD, MM/DD/YYYY, or DD/MM/YYYY"
+            }), 400
+
+        # Validate time format
+        time_pattern = r'^([0-1]?[0-9]|2[0-3]):[0-5][0-9](\s?(AM|PM))?$'
+        if not re.match(time_pattern, data['appointment_time'], re.IGNORECASE):
+            logger.error(f"Invalid time format: {data['appointment_time']}")
+            return jsonify({
+                "status": "error",
+                "message": "Invalid time format. Use HH:MM or HH:MM AM/PM"
+            }), 400
+
+        # Check for duplicate appointments
+        existing_appointment = Appointment.query.filter_by(
+            patient_email=data['email'],
+            appointment_date=appointment_date,
+            appointment_time=data['appointment_time']
+        ).first()
+        
+        if existing_appointment:
+            logger.warning(f"Duplicate appointment attempt: {data['email']} on {appointment_date}")
+            return jsonify({
+                "status": "error",
+                "message": "An appointment already exists for this email, date, and time"
+            }), 409
+
+        # Create new appointment record
+        new_appointment = Appointment(
+            patient_name=data['name'].strip(),
+            patient_email=data['email'].strip().lower(),
+            patient_phone=data['phone'].strip(),
+            doctor_type=data.get('doctor_type', 'General Physician').strip(),
+            health_issue=data.get('issue', '').strip(),
+            appointment_date=appointment_date,
+            appointment_time=data['appointment_time'].strip(),
+            status='confirmed',
+            created_at=datetime.utcnow()
+        )
+
+        db.session.add(new_appointment)
+        db.session.commit()
+        
+        logger.info(f"Appointment saved successfully: ID {new_appointment.id}")
+
+        return jsonify({
+            "status": "success",
+            "message": "Appointment saved successfully",
+            "appointment_id": new_appointment.id,
+            "appointment": new_appointment.to_dict()
+        }), 200
+
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Database error: {str(e)}")
+        return jsonify({
+            "status": "error",
+            "message": f"Internal server error: {str(e)}"
+        }), 500
+
+@app.route('/api/appointments', methods=['GET'])
+def get_appointments():
+    """Get all appointments (for admin view)"""
+    try:
+        appointments = Appointment.query.order_by(Appointment.appointment_date.desc()).all()
+        logger.info(f"Retrieved {len(appointments)} appointments")
+        return jsonify({
+            "status": "success",
+            "count": len(appointments),
+            "appointments": [apt.to_dict() for apt in appointments]
+        }), 200
+    except Exception as e:
+        logger.error(f"Error retrieving appointments: {str(e)}")
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
+
+@app.route('/api/health', methods=['GET'])
+def health_check():
+    """Health check endpoint for monitoring"""
+    try:
+        # Test database connection
+        from sqlalchemy import text
+        db.session.execute(text('SELECT 1'))
+        return jsonify({
+            "status": "healthy",
+            "timestamp": datetime.utcnow().isoformat(),
+            "database": "connected"
+        }), 200
+    except Exception as e:
+        return jsonify({
+            "status": "unhealthy",
+            "timestamp": datetime.utcnow().isoformat(),
+            "error": str(e)
+        }), 500
+
 # ------------------------------------ Run --------------------------------------
 
 if __name__ == "__main__":
     os.makedirs("uploads", exist_ok=True)
-    app.run(debug=True)
+    app.run(debug=True)   

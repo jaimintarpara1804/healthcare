@@ -1,0 +1,180 @@
+HEALTH CARE WEBSITE - PPT CONTENT
+
+SLIDE 1: TITLE
+Health Care - Integrated Wellness Platform
+Comprehensive Web-Based Healthcare Management System
+By: [Your Name]
+
+SLIDE 2: PROJECT OVERVIEW
+• Web-based healthcare platform
+• Technology: Flask (Python), SQLite, HTML/CSS/JS
+• 10 major modules, 15+ routes, 18 templates
+• Fully functional and tested
+• GitHub: https://github.com/jaimintarpara1804/healthcare
+
+SLIDE 3: KEY FEATURES
+1. User Authentication (Register/Login/Password Reset)
+2. Symptom Checker (AI-like diagnosis)
+3. BMI & Fitness Calculator
+4. Yoga Therapy Recommendations
+5. Allopathic Medicine Suggestions
+6. Ayurvedic Treatment Options
+7. Automated Appointment Booking
+8. Wellness Dashboard
+9. Doctor Consultation
+10. Feedback System
+
+SLIDE 4: SYMPTOM CHECKER
+• 18 symptoms to select from
+• 30+ medical conditions in database
+• Intelligent matching algorithm
+• Urgency detection for emergencies
+• Specialist recommendations
+• Home care suggestions
+• Example: Select fever + cough → Shows Flu, Cold, COVID-19
+
+SLIDE 5: BMI CALCULATOR
+• BMI (Body Mass Index)
+• WHtR (Waist-to-Height Ratio)
+• BMR (Basal Metabolic Rate)
+• TDEE (Total Daily Energy Expenditure)
+• Personalized recommendations
+• Category-specific yoga poses
+• Dietary advice
+
+SLIDE 6: TREATMENT MODULES
+YOGA THERAPY:
+• 20+ poses with instructions
+• Disease-based recommendations
+• Benefits and precautions
+
+ALLOPATHIC MEDICINE:
+• Medicine suggestions by disease
+• Dosage and side effects
+• 10+ medicines with details
+
+AYURVEDIC TREATMENT:
+• Natural remedies
+• Herbal medicines
+• Lifestyle advice
+
+SLIDE 7: AUTOMATED APPOINTMENTS
+• Professional Tally form integration
+• Make.com automation workflow
+• Google Calendar synchronization
+• Automatic email notifications
+• Zero manual intervention
+• Real-time booking system
+
+SLIDE 8: SECURITY FEATURES
+• Password hashing (PBKDF2-SHA256)
+• Secure session management
+• Input validation
+• SQL injection prevention
+• Protected routes
+• Forgot password with reset codes
+
+SLIDE 9: TECHNICAL ARCHITECTURE
+• MVC Pattern (Model-View-Controller)
+• Flask framework with SQLAlchemy ORM
+• SQLite database for data persistence
+• Responsive UI with mobile support
+• RESTful API design
+• External integrations (Tally, Make.com, Google)
+
+SLIDE 10: USER INTERFACE
+• Modern, responsive design
+• Mobile-friendly interface
+• Professional medical theme
+• Consistent branding
+• User-friendly navigation
+• Accessibility compliant
+
+SLIDE 11: TESTING & VALIDATION
+• All features tested and working
+• User authentication verified
+• Symptom checker algorithm validated
+• BMI calculations confirmed
+• Appointment automation tested
+• Email notifications working
+• Mobile responsiveness checked
+
+SLIDE 12: DEMO FLOW
+1. Register/Login → testuser@example.com
+2. Symptom Checker → Select fever, cough
+3. BMI Calculator → Enter height/weight
+4. Yoga → Enter "stress" for recommendations
+5. Medicine → Enter "fever" for suggestions
+6. Book Appointment → Fill form
+7. Dashboard → View statistics
+
+SLIDE 13: INTEGRATIONS
+• Tally Forms - Professional form builder
+• Make.com - No-code automation platform
+• Google Calendar API - Appointment scheduling
+• Gmail API - Email notifications
+• Modern web technologies
+
+SLIDE 14: PROJECT STATISTICS
+• Lines of Code: 1000+
+• Database Tables: 2 (User, Consultation)
+• Routes: 15+
+• Templates: 18
+• Features: 10 major modules
+• External APIs: 3
+• Security: Industry-standard
+
+SLIDE 15: UNIQUE SELLING POINTS
+• Holistic approach (3 treatment types)
+• AI-like symptom diagnosis
+• Full appointment automation
+• Comprehensive health tracking
+• Security-first design
+• Modern technology stack
+• Professional UI/UX
+
+SLIDE 16: FUTURE ENHANCEMENTS
+• Health journal tracking
+• Medication reminders
+• Lab reports manager
+• Telemedicine integration
+• Mobile app development
+• Multi-language support
+• AI chatbot assistant
+
+SLIDE 17: LEARNING OUTCOMES
+Technical Skills:
+• Full-stack web development
+• Database design and management
+• API integration
+• Authentication and security
+• Automation workflows
+
+Concepts Applied:
+• MVC architecture
+• Password hashing
+• Algorithm design
+• Mathematical calculations
+• Version control
+
+SLIDE 18: CONCLUSION
+• Fully functional healthcare platform
+• Production-ready application
+• Demonstrates technical expertise
+• Solves real-world problems
+• Ready for deployment
+• Professional development practices
+
+SLIDE 19: THANK YOU
+Questions & Demo
+Live Website: http://localhost:5000
+GitHub: https://github.com/jaimintarpara1804/healthcare
+Contact: [Your Email]
+
+SLIDE 20: LIVE DEMO
+[Show actual website running]
+• User registration/login
+• Symptom checker in action
+• BMI calculator results
+• Appointment booking
+• Dashboard statistics

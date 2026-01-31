@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Health Care • My Appointments</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: var(--space-lg);
+    }
+    
+    .appointments-container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .header {
+      background: white;
+      border-radius: var(--radius-xl);
+      padding: var(--space-xl);
+      margin-bottom: var(--space-lg);
+      box-shadow: var(--shadow-xl);
+      text-align: center;
+    }
+    
+    .header h1 {
+      color: var(--primary-600);
+      margin: 0 0 var(--space-sm) 0;
+      font-size: 2rem;
+    }
+    
+    .header p {
+      color: var(--gray-600);
+      margin: 0;
+    }
+    
+    .nav-links {
+      display: flex;
+      gap: var(--space-md);
+      justify-content: center;
+      margin-top: var(--space-lg);
+    }
+    
+    .nav-links a {
+      color: var(--primary-600);
+      text-decoration: none;
+      font-weight: 600;
+      padding: var(--space-sm) var(--space-md);
+      border-radius: var(--radius-md);
+      transition: background-color 0.2s;
+    }
+    
+    .nav-links a:hover {
+      background: var(--primary-50);
+    }
+    
+    .appointments-grid {
+      display: grid;
+      gap: var(--space-lg);
+    }
+    
+    .appointment-card {
+      background: white;
+      border-radius: var(--radius-xl);
+      padding: var(--space-xl);
+      box-shadow: var(--shadow-lg);
+      border-left: 4px solid var(--primary-500);
+    }
+    
+    .appointment-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--space-md);
+    }
+    
+    .appointment-date {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--primary-600);
+    }
+    
+    .appointment-status {
+      padding: var(--space-xs) var(--space-sm);
+      border-radius: var(--radius-full);
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    
+    .status-confirmed {
+      background: var(--accent-100);
+      color: var(--accent-700);
+    }
+    
+    .status-pending {
+      background: #fef3c7;
+      color: #92400e;
+    }
+    
+    .status-completed {
+      background: #d1fae5;
+      color: #065f46;
+    }
+    
+    .status-cancelled {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+    
+    .appointment-details {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: var(--space-md);
+    }
+    
+    .detail-item {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .detail-label {
+      font-size: 0.875rem;
+      color: var(--gray-500);
+      font-weight: 600;
+      margin-bottom: var(--space-xs);
+    }
+    
+    .detail-value {
+      color: var(--gray-900);
+      font-weight: 500;
+    }
+    
+    .no-appointments {
+      background: white;
+      border-radius: var(--radius-xl);
+      padding: var(--space-2xl);
+      text-align: center;
+      box-shadow: var(--shadow-lg);
+    }
+    
+    .no-appointments-icon {
+      font-size: 4rem;
+      margin-bottom: var(--space-lg);
+    }
+    
+    .no-appointments h3 {
+      color: var(--gray-700);
+      margin-bottom: var(--space-md);
+    }
+    
+    .no-appointments p {
+      color: var(--gray-500);
+      margin-bottom: var(--space-lg);
+    }
+    
+    @media (max-width: 640px) {
+      .appointment-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-sm);
+      }
+      
+      .nav-links {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="appointments-container">
+    <!-- Header -->
+    <div class="header">
+      <h1>📅 My Appointments</h1>
+      <p>View and manage your healthcare appointments</p>
+      
+      <div class="nav-links">
+        <a href="/home">🏠 Home</a>
+        <a href="/consult">📝 Book New</a>
+        <a href="/dashboard">📊 Dashboard</a>
+        <a href="/logout">🚪 Logout</a>
+      </div>
+    </div>
+
+    <!-- Appointments List -->
+    {% if appointments %}
+      <div class="appointments-grid">
+        {% for appointment in appointments %}
+          <div class="appointment-card">
+            <div class="appointment-header">
+              <div class="appointment-date">
+                📅 {{ appointment.appointment_date.strftime('%B %d, %Y') }} at {{ appointment.appointment_time }}
+              </div>
+              <div class="appointment-status status-{{ appointment.status }}">
+                {{ appointment.status }}
+              </div>
+            </div>
+            
+            <div class="appointment-details">
+              <div class="detail-item">
+                <div class="detail-label">👨‍⚕️ Doctor Type</div>
+                <div class="detail-value">{{ appointment.doctor_type }}</div>
+              </div>
+              
+              <div class="detail-item">
+                <div class="detail-label">📧 Email</div>
+                <div class="detail-value">{{ appointment.patient_email }}</div>
+              </div>
+              
+              <div class="detail-item">
+                <div class="detail-label">📱 Phone</div>
+                <div class="detail-value">{{ appointment.patient_phone or 'Not provided' }}</div>
+              </div>
+              
+              <div class="detail-item">
+                <div class="detail-label">📋 Health Issue</div>
+                <div class="detail-value">{{ appointment.health_issue or 'General consultation' }}</div>
+              </div>
+              
+              <div class="detail-item">
+                <div class="detail-label">📅 Booked On</div>
+                <div class="detail-value">{{ appointment.created_at.strftime('%B %d, %Y at %I:%M %p') if appointment.created_at else 'Unknown' }}</div>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <!-- No Appointments -->
+      <div class="no-appointments">
+        <div class="no-appointments-icon">📅</div>
+        <h3>No Appointments Yet</h3>
+        <p>You haven't booked any appointments yet. Start by scheduling your first consultation!</p>
+        <a href="/consult" class="btn btn-primary">📝 Book Your First Appointment</a>
+      </div>
+    {% endif %}
+  </div>
+</body>
+</html>

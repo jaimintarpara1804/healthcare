@@ -8,7 +8,7 @@ from datetime import datetime, date, timedelta
 from functools import wraps
 
 app = Flask(__name__)
-app.secret_key = "healthcare_secret_2024_secure"
+app.secret_key = os.environ.get("SECRET_KEY", "healthcare_secret_2024_secure")
 
 # Enable CORS for API endpoints
 CORS(app, resources={r"/api/*": {"origins": "*"}})
@@ -21,9 +21,14 @@ logger = logging.getLogger(__name__)
 instance_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'instance')
 os.makedirs(instance_path, exist_ok=True)
 
-# Use absolute path for database
-db_path = os.path.join(instance_path, 'users.db')
-app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
+# Use absolute path for database - modified for Vercel deployment
+if os.environ.get('VERCEL'):
+    # For Vercel deployment, use a temporary database (consider using external DB for production)
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tmp/users.db'
+else:
+    # Local development
+    db_path = os.path.join(instance_path, 'users.db')
+    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
